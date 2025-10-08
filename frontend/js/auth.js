@@ -748,6 +748,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         authContainer.style.display = 'none';
         chatContainer.style.display = 'flex';
+        
+        // Load chat history if chat.js is loaded
+        if (window.loadChatHistory) {
+            window.loadChatHistory();
+        }
     }
 
     // API calls that will connect to backend (to be implemented)
