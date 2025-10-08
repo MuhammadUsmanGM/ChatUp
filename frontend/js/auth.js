@@ -398,6 +398,41 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Password visibility toggle functionality
+    function setupPasswordToggle(inputId, toggleId) {
+        const passwordInput = document.getElementById(inputId);
+        const toggleElement = document.getElementById(toggleId);
+        
+        if (passwordInput && toggleElement) {
+            toggleElement.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // Toggle the eye icon
+                const icon = toggleElement.querySelector('i');
+                if (icon) {
+                    if (type === 'password') {
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    } else {
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    }
+                }
+            });
+        }
+    }
+    
+    // Setup password toggles for all password fields
+    setupPasswordToggle('reveal-email-password', 'toggle-reveal-email-password');
+    setupPasswordToggle('old-password', 'toggle-old-password');
+    setupPasswordToggle('new-password', 'toggle-new-password');
+    setupPasswordToggle('confirm-new-password', 'toggle-confirm-new-password');
+    setupPasswordToggle('delete-password', 'toggle-delete-password');
+    setupPasswordToggle('login-password', 'toggle-login-password');
+    setupPasswordToggle('signup-password', 'toggle-signup-password');
+    setupPasswordToggle('signup-confirm-password', 'toggle-signup-confirm-password');
+    
     // Close profile modal
     if (closeProfile) {
         closeProfile.addEventListener('click', function() {

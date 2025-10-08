@@ -159,6 +159,30 @@ body {
     color: #aaa;
 }
 
+/* Password input with toggle */
+.password-input-container {
+    position: relative;
+    width: 100%;
+}
+
+.password-input-container input {
+    padding-right: 40px; /* Make space for the eye icon */
+}
+
+.password-toggle {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #777;
+    transition: color 0.3s;
+}
+
+.password-toggle:hover {
+    color: #667eea;
+}
+
 .btn {
     padding: 12px 18px; /* Reduced padding to save space */
     border: none;

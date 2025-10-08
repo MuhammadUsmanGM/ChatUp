@@ -36,7 +36,12 @@
                         </div>
                         <div class="input-group">
                             <label for="login-password">Password</label>
-                            <input type="password" id="login-password" name="password" required>
+                            <div class="password-input-container">
+                                <input type="password" id="login-password" name="password" required>
+                                <span class="password-toggle" id="toggle-login-password">
+                                    <i class="fas fa-eye"></i>
+                                </span>
+                            </div>
                         </div>
                         <button type="submit" class="btn primary">Login</button>
                     </form>
@@ -55,11 +60,21 @@
                         </div>
                         <div class="input-group">
                             <label for="signup-password">Password</label>
-                            <input type="password" id="signup-password" name="password" required>
+                            <div class="password-input-container">
+                                <input type="password" id="signup-password" name="password" required>
+                                <span class="password-toggle" id="toggle-signup-password">
+                                    <i class="fas fa-eye"></i>
+                                </span>
+                            </div>
                         </div>
                         <div class="input-group">
                             <label for="signup-confirm-password">Confirm Password</label>
-                            <input type="password" id="signup-confirm-password" name="confirm-password" required>
+                            <div class="password-input-container">
+                                <input type="password" id="signup-confirm-password" name="confirm-password" required>
+                                <span class="password-toggle" id="toggle-signup-confirm-password">
+                                    <i class="fas fa-eye"></i>
+                                </span>
+                            </div>
                         </div>
                         <button type="submit" class="btn primary">Sign Up</button>
                     </form>
@@ -197,15 +212,30 @@
                 <form id="change-password-form">
                     <div class="input-group">
                         <label for="old-password"><i class="fas fa-lock"></i> Current Password</label>
-                        <input type="password" id="old-password" name="oldPassword" required>
+                        <div class="password-input-container">
+                            <input type="password" id="old-password" name="oldPassword" required>
+                            <span class="password-toggle" id="toggle-old-password">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
                     </div>
                     <div class="input-group">
                         <label for="new-password"><i class="fas fa-key"></i> New Password</label>
-                        <input type="password" id="new-password" name="newPassword" required>
+                        <div class="password-input-container">
+                            <input type="password" id="new-password" name="newPassword" required>
+                            <span class="password-toggle" id="toggle-new-password">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
                     </div>
                     <div class="input-group">
                         <label for="confirm-new-password"><i class="fas fa-check-circle"></i> Confirm New Password</label>
-                        <input type="password" id="confirm-new-password" name="confirmNewPassword" required>
+                        <div class="password-input-container">
+                            <input type="password" id="confirm-new-password" name="confirmNewPassword" required>
+                            <span class="password-toggle" id="toggle-confirm-new-password">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
                     </div>
                     <div class="password-actions">
                         <button type="button" id="cancel-password" class="btn secondary">Cancel</button>
@@ -262,7 +292,12 @@
                 </div>
                 <div class="input-group">
                     <label for="delete-password"><i class="fas fa-lock"></i> Confirm Password</label>
-                    <input type="password" id="delete-password" name="deletePassword" placeholder="Enter your password" required>
+                    <div class="password-input-container">
+                        <input type="password" id="delete-password" name="deletePassword" placeholder="Enter your password" required>
+                        <span class="password-toggle" id="toggle-delete-password">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
                 </div>
                 <div class="delete-account-warning">
                     <p>All your data will be permanently deleted. This action cannot be reversed.</p>
@@ -325,7 +360,12 @@
             <div class="reveal-email-content">
                 <div class="input-group">
                     <label for="reveal-email-password"><i class="fas fa-lock"></i> Enter Password</label>
-                    <input type="password" id="reveal-email-password" name="revealPassword" placeholder="Enter your password" required>
+                    <div class="password-input-container">
+                        <input type="password" id="reveal-email-password" name="revealPassword" placeholder="Enter your password" required>
+                        <span class="password-toggle" id="toggle-reveal-email-password">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
                 </div>
                 <div class="reveal-email-info">
                     <p>Please enter your password to reveal your email address.</p>
