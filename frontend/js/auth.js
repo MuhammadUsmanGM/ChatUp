@@ -68,10 +68,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     localStorage.setItem('userName', backendData.name || email.split('@')[0]);
                     localStorage.setItem('userEmail', backendData.email);
                     localStorage.setItem('isLoggedIn', 'true');
+                    // Clear any pending verification state
+                    localStorage.removeItem('pendingVerificationEmail');
                     showChatInterface(backendData.name || email.split('@')[0]);
                     showNotification('Login successful!', 'success');
                 } else {
-                    showNotification(`Login failed: ${response.error}`, 'error');
+                    // Check if the error is related to email verification
+                    if (response.message && response.message.includes('verify your email')) {
+                        // Show notification with a resend button
+                        showNotification(
+                            response.message, 
+                            'info', 
+                            { 
+                                text: 'Resend Email', 
+                                fn: 'resendVerificationFromNotification' 
+                            }
+                        );
+                    } else {
+                        showNotification(`Login failed: ${response.error}`, 'error');
+                    }
                 }
             } catch (error) {
                 console.error('Login error:', error);
@@ -124,15 +139,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 const response = await registerUser({ name, email, password });
                 
                 if (response.success) {
-                    // Successful registration - store user info in localStorage
-                    const backendData = response.data;
-                    localStorage.setItem('userName', backendData.name || name);
-                    localStorage.setItem('userEmail', backendData.email || email);
-                    localStorage.setItem('isLoggedIn', 'true');
-                    showChatInterface(backendData.name || name);
-                    showNotification('Registration successful!', 'success');
+                    // Show email verification screen
+                    document.getElementById('auth-forms').style.display = 'none';
+                    document.getElementById('email-verification').style.display = 'block';
+                    
+                    // Store email for potential resend functionality
+                    localStorage.setItem('pendingVerificationEmail', email);
+                    
+                    // Display masked email
+                    const maskedEmail = maskEmail(email);
+                    document.getElementById('verification-email-display').textContent = maskedEmail;
+                    
+                    // Show notification about email verification
+                    showNotification('Registration successful! Please check your email to verify your account.', 'success');
                 } else {
-                    showNotification(`Registration failed: ${response.error}`, 'error');
+                    // Check if the error is related to email already existing
+                    if (response.message && response.message.includes('already exists')) {
+                        showNotification('An account with this email already exists.', 'error');
+                    } else {
+                        showNotification(`Registration failed: ${response.error || response.message}`, 'error');
+                    }
                 }
             } catch (error) {
                 console.error('Registration error:', error);
@@ -169,8 +195,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const name = localStorage.getItem('userName') || 'User';
             showChatInterface(name);
         } else {
-            authContainer.style.display = 'flex';
-            chatContainer.style.display = 'none';
+            // Check if user just registered and is waiting for verification
+            const pendingEmail = localStorage.getItem('pendingVerificationEmail');
+            if (pendingEmail) {
+                // Show verification screen
+                authContainer.style.display = 'flex';
+                chatContainer.style.display = 'none';
+                document.getElementById('auth-forms').style.display = 'none';
+                document.getElementById('email-verification').style.display = 'block';
+                
+                // Display masked email
+                const maskedEmail = maskEmail(pendingEmail);
+                document.getElementById('verification-email-display').textContent = maskedEmail;
+            } else {
+                authContainer.style.display = 'flex';
+                chatContainer.style.display = 'none';
+            }
         }
     }
 
@@ -290,8 +330,92 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Function to show notification
-    function showNotification(message, type) {
+    // Function to mask email address (show first and last characters, mask the middle)
+    function maskEmail(email) {
+        if (!email) return '';
+        
+        const [localPart, domain] = email.split('@');
+        
+        if (localPart.length <= 2) {
+            // If local part is too short, just show first char and ***
+            return `${localPart[0]}***@${domain}`;
+        }
+        
+        const firstChar = localPart[0];
+        const lastChar = localPart[localPart.length - 1];
+        const maskedPart = `${firstChar}***${lastChar}`;
+        
+        return `${maskedPart}@${domain}`;
+    }
+    
+    // Function to resend verification email from notification
+    async function resendVerificationFromNotification() {
+        // Use the email from the login form for resending
+        const email = document.getElementById('login-email') ? document.getElementById('login-email').value : '';
+        
+        if (!email) {
+            showNotification('Please enter your email address first.', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/resend-verification', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showNotification(result.message, 'success');
+            } else {
+                showNotification(result.message || 'Failed to resend verification email.', 'error');
+            }
+            
+            return result;
+        } catch (error) {
+            console.error('Error resending verification:', error);
+            showNotification('Network error occurred while resending verification.', 'error');
+            return { success: false, message: 'Network error' };
+        }
+    }
+    
+    // Function to resend verification email
+    async function resendVerification(email) {
+        try {
+            const response = await fetch('/resend-verification', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showNotification(result.message, 'success');
+            } else {
+                showNotification(result.message || 'Failed to resend verification email.', 'error');
+            }
+            
+            return result;
+        } catch (error) {
+            console.error('Error resending verification:', error);
+            showNotification('Network error occurred while resending verification.', 'error');
+            return { success: false, message: 'Network error' };
+        }
+    }
+
+    // Function to show notification with optional action button
+    function showNotification(message, type, action = null) {
         // Remove any existing notifications
         const existingNotification = document.querySelector('.notification');
         if (existingNotification) {
@@ -301,7 +425,25 @@ document.addEventListener('DOMContentLoaded', function() {
         // Create notification element
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
-        notification.textContent = message;
+        
+        // Add message and optional action button
+        if (action) {
+            notification.innerHTML = `
+                <div class="notification-content">${message}</div>
+                <button class="notification-action-btn" onclick="${action.fn}()" style="
+                    background: rgba(255,255,255,0.2); 
+                    border: 1px solid rgba(255,255,255,0.3); 
+                    color: white; 
+                    border-radius: 4px; 
+                    padding: 4px 8px; 
+                    margin-left: 10px; 
+                    cursor: pointer; 
+                    font-size: 0.85em;
+                ">${action.text}</button>
+            `;
+        } else {
+            notification.textContent = message;
+        }
         
         // Add to body
         document.body.appendChild(notification);
@@ -320,6 +462,92 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }, 300);
         }, 5000);
+    }
+
+    // Email verification screen event listeners
+    const backToLoginBtn = document.getElementById('back-to-login');
+    const resendEmailBtn = document.getElementById('resend-email');
+    
+    if (backToLoginBtn) {
+        backToLoginBtn.addEventListener('click', function() {
+            // Show login form and hide verification screen
+            document.getElementById('auth-forms').style.display = 'block';
+            document.getElementById('email-verification').style.display = 'none';
+            // Reset form toggle to login
+            const formToggle = document.querySelector('.form-toggle');
+            formToggle.classList.remove('signup-mode');
+            formToggle.classList.add('login-mode');
+            
+            const loginToggle = document.getElementById('login-toggle');
+            const signupToggle = document.getElementById('signup-toggle');
+            loginToggle.classList.add('active');
+            signupToggle.classList.remove('active');
+            
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('signup-form').style.display = 'none';
+            
+            // Clear the verification email from localStorage
+            localStorage.removeItem('pendingVerificationEmail');
+        });
+    }
+    
+    if (resendEmailBtn) {
+        resendEmailBtn.addEventListener('click', async function() {
+            const email = localStorage.getItem('pendingVerificationEmail');
+            if (!email) {
+                showNotification('No email address found to resend verification.', 'error');
+                return;
+            }
+            
+            // Show loading state
+            resendEmailBtn.textContent = 'Sending...';
+            resendEmailBtn.disabled = true;
+            
+            try {
+                const result = await resendVerification(email);
+                
+                if (result.success) {
+                    showNotification('Verification email has been sent!', 'success');
+                }
+            } catch (error) {
+                console.error('Error resending verification:', error);
+                showNotification('Failed to resend verification email.', 'error');
+            } finally {
+                // Reset button state
+                resendEmailBtn.textContent = 'Resend Email';
+                resendEmailBtn.disabled = false;
+            }
+        });
+    }
+    
+    // Add click handler to go to login if user has verified but is still on verification screen
+    const emailVerificationDiv = document.getElementById('email-verification');
+    if (emailVerificationDiv) {
+        // Create a "Try Login" button for users who have verified in another tab
+        const tryLoginDiv = document.createElement('div');
+        tryLoginDiv.style.marginTop = '1rem';
+        tryLoginDiv.innerHTML = '<p style="color: #666; font-size: 0.9rem;">Already verified? <a href="#" id="try-login-link" style="color: #667eea; text-decoration: none;">Try logging in</a></p>';
+        emailVerificationDiv.appendChild(tryLoginDiv);
+        
+        document.getElementById('try-login-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Reset the form and switch to login
+            document.getElementById('auth-forms').style.display = 'block';
+            document.getElementById('email-verification').style.display = 'none';
+            
+            const formToggle = document.querySelector('.form-toggle');
+            formToggle.classList.remove('signup-mode');
+            formToggle.classList.add('login-mode');
+            
+            const loginToggle = document.getElementById('login-toggle');
+            const signupToggle = document.getElementById('signup-toggle');
+            loginToggle.classList.add('active');
+            signupToggle.classList.remove('active');
+            
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('signup-form').style.display = 'none';
+        });
     }
 
     // Auto-resize textarea

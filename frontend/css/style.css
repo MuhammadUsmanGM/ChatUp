@@ -558,6 +558,9 @@ body::before {
     max-width: 350px;
     word-wrap: break-word;
     border-left: 5px solid;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .notification.show {
@@ -577,6 +580,75 @@ body::before {
 .notification.info {
     background: rgba(33, 150, 243, 0.95);
     border-left-color: #2196F3;
+}
+
+.notification-content {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.notification-action-btn {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    margin-left: 10px !important;
+    cursor: pointer !important;
+    font-size: 0.85em !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+    outline: none !important;
+}
+
+.notification-action-btn:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: scale(1.05) !important;
+}
+
+.verification-container {
+    text-align: center;
+    padding: 2rem;
+    animation: fadeIn 0.6s ease-out;
+}
+
+.verification-icon {
+    margin-bottom: 1.5rem;
+}
+
+.verification-container h2 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.verification-container p {
+    color: #666;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    font-size: 1.1rem;
+}
+
+.verification-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn.secondary {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.btn.secondary:hover {
+    background: #e0e0e0;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive Design */
@@ -618,5 +690,26 @@ body::before {
     
     .chat-header h1 {
         font-size: 1.6rem;
+    }
+    
+    .verification-container {
+        padding: 1.5rem;
+    }
+    
+    .verification-container h2 {
+        font-size: 1.5rem;
+    }
+    
+    .verification-container p {
+        font-size: 1rem;
+    }
+    
+    .verification-actions {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    .btn.secondary {
+        margin-right: 0 !important;
     }
 }

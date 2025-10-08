@@ -12,47 +12,71 @@
     <!-- Authentication Container -->
     <div id="auth-container" class="auth-container">
         <div class="form-container">
-            <div class="form-toggle login-mode">
-                <button id="login-toggle" class="active">Login</button>
-                <button id="signup-toggle">Sign Up</button>
+            <!-- Login/Signup Form -->
+            <div id="auth-forms" style="display: block;">
+                <div class="form-toggle login-mode">
+                    <button id="login-toggle" class="active">Login</button>
+                    <button id="signup-toggle">Sign Up</button>
+                </div>
+                
+                <div id="login-form" class="form-content">
+                    <h2>Login to Your Account</h2>
+                    <form id="loginForm">
+                        <div class="input-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" id="login-email" name="email" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn primary">Login</button>
+                    </form>
+                </div>
+                
+                <div id="signup-form" class="form-content" style="display: none;">
+                    <h2>Create New Account</h2>
+                    <form id="signupForm">
+                        <div class="input-group">
+                            <label for="signup-name">Full Name</label>
+                            <input type="text" id="signup-name" name="name" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="signup-email">Email</label>
+                            <input type="email" id="signup-email" name="email" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="signup-password">Password</label>
+                            <input type="password" id="signup-password" name="password" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="signup-confirm-password">Confirm Password</label>
+                            <input type="password" id="signup-confirm-password" name="confirm-password" required>
+                        </div>
+                        <button type="submit" class="btn primary">Sign Up</button>
+                    </form>
+                </div>
             </div>
             
-            <div id="login-form" class="form-content">
-                <h2>Login to Your Account</h2>
-                <form id="loginForm">
-                    <div class="input-group">
-                        <label for="login-email">Email</label>
-                        <input type="email" id="login-email" name="email" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="login-password">Password</label>
-                        <input type="password" id="login-password" name="password" required>
-                    </div>
-                    <button type="submit" class="btn primary">Login</button>
-                </form>
-            </div>
-            
-            <div id="signup-form" class="form-content" style="display: none;">
-                <h2>Create New Account</h2>
-                <form id="signupForm">
-                    <div class="input-group">
-                        <label for="signup-name">Full Name</label>
-                        <input type="text" id="signup-name" name="name" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="signup-email">Email</label>
-                        <input type="email" id="signup-email" name="email" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="signup-password">Password</label>
-                        <input type="password" id="signup-password" name="password" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="signup-confirm-password">Confirm Password</label>
-                        <input type="password" id="signup-confirm-password" name="confirm-password" required>
-                    </div>
-                    <button type="submit" class="btn primary">Sign Up</button>
-                </form>
+            <!-- Email Verification Screen -->
+            <div id="email-verification" class="verification-container" style="display: none; text-align: center; padding: 2rem;">
+                <div class="verification-icon">
+                    <i class="fas fa-envelope-open-text" style="font-size: 4rem; color: #667eea; margin-bottom: 1rem;"></i>
+                </div>
+                <h2 style="color: #333; margin-bottom: 1rem;">Check Your Email</h2>
+                <p style="color: #666; margin-bottom: 1rem; line-height: 1.6; font-size: 1.1rem;">
+                    We've sent a verification link to your email address.
+                </p>
+                <div id="verification-email-display" style="font-size: 1.3rem; margin: 1.5rem 0; color: #667eea; font-weight: bold;">
+                    <!-- Email will be displayed here -->
+                </div>
+                <p style="color: #666; margin-bottom: 1.5rem; line-height: 1.6; font-size: 1.1rem;">
+                    Please click the link in the email to verify your account and complete registration.
+                </p>
+                <div class="verification-actions">
+                    <button id="back-to-login" class="btn secondary" style="background: #f0f0f0; color: #333; margin-right: 1rem;">Back to Login</button>
+                    <button id="resend-email" class="btn primary">Resend Email</button>
+                </div>
             </div>
         </div>
     </div>

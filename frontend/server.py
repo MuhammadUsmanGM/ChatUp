@@ -60,10 +60,15 @@ def register():
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=10)
         
         # Create user document
+        import secrets
+        verification_token = secrets.token_urlsafe(32)  # Generate a secure token
+        
         user_document = {
             'name': name,
             'email': email,
             'password': hashed_password,
+            'email_verified': False,
+            'verification_token': verification_token,
             'createdAt': datetime.now(),
             'updatedAt': datetime.now()
         }
@@ -72,17 +77,34 @@ def register():
         result = user_collection.insert_one(user_document)
         print(f"User registered successfully: {email}, ID: {result.inserted_id}")
         
-        return jsonify({
-            'success': True,
-            'message': 'User registered successfully',
-            'name': name,
-            'email': email,
-            'data': {
-                'id': str(result.inserted_id),
+        # Send verification email
+        verification_sent = send_verification_email(email, name, user_document['verification_token'])
+        if not verification_sent:
+            print(f"Failed to send verification email to {email}")
+            # We'll still return success but log the failure
+            return jsonify({
+                'success': True,
+                'message': 'User registered successfully, but verification email could not be sent. Please contact support if you do not receive it.',
                 'name': name,
-                'email': email
-            }
-        }), 201
+                'email': email,
+                'data': {
+                    'id': str(result.inserted_id),
+                    'name': name,
+                    'email': email
+                }
+            }), 201
+        else:
+            return jsonify({
+                'success': True,
+                'message': 'User registered successfully! Please check your email to verify your account.',
+                'name': name,
+                'email': email,
+                'data': {
+                    'id': str(result.inserted_id),
+                    'name': name,
+                    'email': email
+                }
+            }), 201
         
     except Exception as e:
         print(f"Registration error: {e}")
@@ -117,6 +139,14 @@ def login():
             return jsonify({
                 'success': False,
                 'message': 'Invalid credentials'
+            }), 401
+        
+        # Check if email is verified
+        if not user.get('email_verified', False):
+            print(f"User {email} attempted login but email is not verified")
+            return jsonify({
+                'success': False,
+                'message': 'Please verify your email address before logging in. Check your email for a verification link.'
             }), 401
         
         # Check password
@@ -288,6 +318,166 @@ finally:
         import traceback
         traceback.print_exc()
         return "I'm having trouble connecting to the chat agent. Please try again later."
+
+
+# Email verification endpoint
+@app.route('/verify-email/<token>', methods=['GET'])
+def verify_email(token):
+    try:
+        # Find user with the provided verification token
+        user = user_collection.find_one({'verification_token': token})
+        
+        if not user:
+            return jsonify({
+                'success': False,
+                'message': 'Invalid or expired verification token.'
+            }), 400
+        
+        # Update user to mark email as verified
+        user_collection.update_one(
+            {'_id': user['_id']},
+            {
+                '$set': {
+                    'email_verified': True,
+                    'verification_token': None  # Remove the token after verification
+                }
+            }
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Email verified successfully! You can now log in to your account.'
+        }), 200
+        
+    except Exception as e:
+        print(f"Email verification error: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred during email verification.'
+        }), 500
+
+
+# Resend verification email endpoint
+@app.route('/resend-verification', methods=['POST'])
+def resend_verification():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        
+        if not email:
+            return jsonify({
+                'success': False,
+                'message': 'Email is required'
+            }), 400
+        
+        # Find user by email
+        user = user_collection.find_one({'email': email})
+        
+        if not user:
+            return jsonify({
+                'success': False,
+                'message': 'User not found'
+            }), 404
+        
+        # Check if user is already verified
+        if user.get('email_verified', False):
+            return jsonify({
+                'success': False,
+                'message': 'Email is already verified'
+            }), 400
+        
+        # Generate a new verification token
+        import secrets
+        new_token = secrets.token_urlsafe(32)
+        
+        # Update user with new token
+        user_collection.update_one(
+            {'_id': user['_id']},
+            {
+                '$set': {
+                    'verification_token': new_token
+                }
+            }
+        )
+        
+        # Send verification email with new token
+        verification_sent = send_verification_email(email, user['name'], new_token)
+        if not verification_sent:
+            return jsonify({
+                'success': False,
+                'message': 'Failed to send verification email. Please try again later.'
+            }), 500
+        else:
+            return jsonify({
+                'success': True,
+                'message': 'Verification email has been sent successfully!'
+            }), 200
+            
+    except Exception as e:
+        print(f"Resend verification error: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while resending verification email.'
+        }), 500
+
+
+# Function to send verification email
+def send_verification_email(email, name, token):
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+    
+    # Email configuration - you can use environment variables for these
+    smtp_server = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
+    smtp_port = int(os.getenv('SMTP_PORT', '587'))
+    sender_email = os.getenv('EMAIL_ADDRESS')
+    sender_password = os.getenv('EMAIL_PASSWORD')
+    
+    if not sender_email or not sender_password:
+        print("Email configuration missing. Please set EMAIL_ADDRESS and EMAIL_PASSWORD environment variables.")
+        return False
+    
+    try:
+        # Create the verification link - using configurable base URL for production
+        import os
+        base_url = os.getenv('BASE_URL', 'http://localhost:5000')  # Set this to your production URL
+        verification_link = f"{base_url}/verify-email/{token}"
+        
+        # Create the email
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = email
+        msg['Subject'] = "Verify Your Email Address - ChatUp"
+        
+        body = f"""
+        Hello {name},
+        
+        Thank you for registering with ChatUp! Please click the link below to verify your email address:
+        
+        {verification_link}
+        
+        If you did not register for ChatUp, please ignore this email.
+        
+        Best regards,
+        The ChatUp Team
+        """
+        
+        msg.attach(MIMEText(body, 'plain'))
+        
+        # Connect to server and send email
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        text = msg.as_string()
+        server.sendmail(sender_email, email, text)
+        server.quit()
+        
+        print(f"Verification email sent to {email}")
+        return True
+        
+    except Exception as e:
+        print(f"Failed to send verification email: {e}")
+        return False
 
 
 # Chat endpoint that integrates with the backend agent
