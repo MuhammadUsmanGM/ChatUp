@@ -20,6 +20,8 @@ try:
     client = MongoClient(MONGO_URI)
     db = client[DB_NAME]
     user_collection = db[COLLECTION_NAME]
+    # Create a separate collection for chat history
+    chat_history_collection = db['Chat_History']
     print("Connected to MongoDB successfully")
     print(f"Database: {DB_NAME}")
     print(f"Collection: {COLLECTION_NAME}")
@@ -663,6 +665,56 @@ def delete_account():
         return jsonify({
             'success': False,
             'message': 'An error occurred while deleting your account.'
+        }), 500
+
+
+# Verify password for specific user
+@app.route('/verify-password', methods=['POST'])
+def verify_password():
+    try:
+        # Get the user's token
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'success': False,
+                'message': 'Authentication required'
+            }), 401
+        
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        
+        if not email or not password:
+            return jsonify({
+                'success': False,
+                'message': 'Email and password are required'
+            }), 400
+        
+        # Find the user in the database
+        user = user_collection.find_one({'email': email})
+        if not user:
+            return jsonify({
+                'success': False,
+                'message': 'User not found'
+            }), 404
+        
+        # Verify the password
+        if check_password_hash(user['password'], password):
+            return jsonify({
+                'success': True,
+                'message': 'Password verified successfully'
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Incorrect password'
+            }), 401
+            
+    except Exception as e:
+        print(f"Verify password error: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while verifying your password.'
         }), 500
 
 

@@ -252,6 +252,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const profileEmail = document.getElementById('profile-email');
     const profileJoinDate = document.getElementById('profile-join-date');
     
+    // Function to mask email (show first and last characters, mask the middle)
+    function maskEmail(email) {
+        if (!email) return '';
+        
+        const [localPart, domain] = email.split('@');
+        
+        if (localPart.length <= 2) {
+            // If local part is too short, just show first char and ***
+            return `${localPart[0]}***@${domain}`;
+        }
+        
+        const firstChar = localPart[0];
+        const lastChar = localPart[localPart.length - 1];
+        const maskedPart = `${firstChar}***${lastChar}`;
+        
+        return `${maskedPart}@${domain}`;
+    }
+    
     // Show profile modal
     if (profileBtn) {
         profileBtn.addEventListener('click', function() {
@@ -261,7 +279,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Set profile data
             profileName.textContent = name;
-            profileEmail.textContent = email;
+            
+            // Mask the email by default
+            if (email !== 'Not available') {
+                profileEmail.textContent = maskEmail(email);
+            } else {
+                profileEmail.textContent = email;
+            }
             
             // Calculate join date (using registration timestamp if available, or current date as fallback)
             const joinDate = localStorage.getItem('joinDate') || new Date().toISOString().split('T')[0];
@@ -273,6 +297,104 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show modal
             profileModal.style.display = 'flex';
             document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        });
+    }
+    
+    // Reveal email functionality
+    const revealEmailBtn = document.getElementById('reveal-email-btn');
+    const revealEmailModal = document.getElementById('reveal-email-modal');
+    const closeRevealEmail = document.getElementById('close-reveal-email');
+    const cancelRevealEmail = document.getElementById('cancel-reveal-email');
+    const confirmRevealEmail = document.getElementById('confirm-reveal-email');
+    const revealEmailPassword = document.getElementById('reveal-email-password');
+    
+    // Show reveal email modal
+    if (revealEmailBtn) {
+        revealEmailBtn.addEventListener('click', function() {
+            // Clear password field
+            revealEmailPassword.value = '';
+            // Show modal
+            revealEmailModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        });
+    }
+    
+    // Close reveal email modal
+    if (closeRevealEmail) {
+        closeRevealEmail.addEventListener('click', function() {
+            revealEmailModal.style.display = 'none';
+            revealEmailPassword.value = ''; // Clear password field
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        });
+    }
+    
+    if (cancelRevealEmail) {
+        cancelRevealEmail.addEventListener('click', function() {
+            revealEmailModal.style.display = 'none';
+            revealEmailPassword.value = ''; // Clear password field
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        });
+    }
+    
+    // Also close modal when clicking outside of it
+    if (revealEmailModal) {
+        revealEmailModal.addEventListener('click', function(e) {
+            if (e.target === revealEmailModal) {
+                revealEmailModal.style.display = 'none';
+                revealEmailPassword.value = ''; // Clear password field
+                document.body.style.overflow = 'auto'; // Re-enable scrolling
+            }
+        });
+    }
+    
+    // Handle email reveal confirmation
+    if (confirmRevealEmail) {
+        confirmRevealEmail.addEventListener('click', async function() {
+            const password = revealEmailPassword.value.trim();
+            const userEmail = localStorage.getItem('userEmail');
+            
+            if (!password) {
+                showNotification('Please enter your password', 'error');
+                return;
+            }
+            
+            // Disable button during verification
+            confirmRevealEmail.textContent = 'Verifying...';
+            confirmRevealEmail.disabled = true;
+            
+            try {
+                // Call the backend to verify password
+                const response = await fetch('/verify-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}` // Include auth token
+                    },
+                    body: JSON.stringify({
+                        email: userEmail,
+                        password: password
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    // Password is correct, show full email
+                    profileEmail.textContent = userEmail;
+                    revealEmailModal.style.display = 'none';
+                    revealEmailPassword.value = ''; // Clear password field
+                    showNotification('Email revealed successfully', 'success');
+                } else {
+                    showNotification(result.message || 'Incorrect password. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error verifying password:', error);
+                showNotification('An error occurred while verifying your password. Please try again.', 'error');
+            } finally {
+                // Re-enable button
+                confirmRevealEmail.textContent = 'Reveal Email';
+                confirmRevealEmail.disabled = false;
+            }
         });
     }
     

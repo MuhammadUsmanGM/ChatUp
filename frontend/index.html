@@ -170,6 +170,7 @@
                     <div class="profile-field">
                         <label><i class="fas fa-envelope"></i> Email</label>
                         <span id="profile-email">Loading...</span>
+                        <button id="reveal-email-btn" class="btn secondary small-btn" style="margin-top: 0.5rem; padding: 0.4rem 0.8rem; font-size: 0.85rem;">Reveal Email</button>
                     </div>
                     <div class="profile-field">
                         <label><i class="fas fa-calendar"></i> Member Since</label>
@@ -310,6 +311,29 @@
             <div class="logout-actions">
                 <button id="cancel-logout" class="btn secondary">Cancel</button>
                 <button id="confirm-logout" class="btn primary">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reveal Email Password Confirmation Modal -->
+    <div id="reveal-email-modal" class="modal-overlay" style="display: none;">
+        <div class="reveal-email-modal">
+            <div class="reveal-email-header">
+                <h2>Confirm Password</h2>
+                <button id="close-reveal-email" class="close-btn">&times;</button>
+            </div>
+            <div class="reveal-email-content">
+                <div class="input-group">
+                    <label for="reveal-email-password"><i class="fas fa-lock"></i> Enter Password</label>
+                    <input type="password" id="reveal-email-password" name="revealPassword" placeholder="Enter your password" required>
+                </div>
+                <div class="reveal-email-info">
+                    <p>Please enter your password to reveal your email address.</p>
+                </div>
+            </div>
+            <div class="reveal-email-actions">
+                <button id="cancel-reveal-email" class="btn secondary">Cancel</button>
+                <button id="confirm-reveal-email" class="btn primary">Reveal Email</button>
             </div>
         </div>
     </div>
