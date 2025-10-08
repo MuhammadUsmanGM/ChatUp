@@ -215,6 +215,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const joinDate = localStorage.getItem('joinDate') || new Date().toISOString().split('T')[0];
             profileJoinDate.textContent = formatDate(joinDate);
             
+            // Update avatar display with custom image if available
+            updateAvatarDisplay();
+            
             // Show modal
             profileModal.style.display = 'flex';
             document.body.style.overflow = 'hidden'; // Prevent background scrolling
@@ -244,6 +247,70 @@ document.addEventListener('DOMContentLoaded', function() {
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         const date = new Date(dateString);
         return date.toLocaleDateString(undefined, options);
+    }
+    
+    // Update avatar display based on stored avatar
+    function updateAvatarDisplay() {
+        const storedAvatar = localStorage.getItem('userAvatar');
+        const profileAvatar = document.querySelector('.profile-avatar .fas.fa-user-circle');
+        const currentAvatar = document.getElementById('current-avatar');
+        
+        if (storedAvatar) {
+            // Update profile modal avatar
+            if (profileAvatar) {
+                profileAvatar.className = 'user-avatar-img';
+                profileAvatar.style.backgroundImage = `url(${storedAvatar})`;
+                profileAvatar.style.backgroundSize = 'cover';
+                profileAvatar.style.backgroundPosition = 'center';
+                profileAvatar.style.borderRadius = '50%';
+                profileAvatar.style.width = '100%';
+                profileAvatar.style.height = '100%';
+            }
+            
+            // Update edit profile modal avatar
+            if (currentAvatar) {
+                currentAvatar.className = 'user-avatar-img';
+                currentAvatar.style.backgroundImage = `url(${storedAvatar})`;
+                currentAvatar.style.backgroundSize = 'cover';
+                currentAvatar.style.backgroundPosition = 'center';
+                currentAvatar.style.borderRadius = '50%';
+                currentAvatar.style.width = '100%';
+                currentAvatar.style.height = '100%';
+                currentAvatar.style.display = 'block';
+                
+                // Create a placeholder element for the icon to maintain structure
+                if (currentAvatar.children.length === 0) {
+                    const iconPlaceholder = document.createElement('div');
+                    iconPlaceholder.style.paddingTop = '100%'; // Maintain aspect ratio
+                    currentAvatar.appendChild(iconPlaceholder);
+                }
+            }
+        } else {
+            // Use default icon if no stored avatar
+            if (profileAvatar) {
+                profileAvatar.className = 'fas fa-user-circle';
+                profileAvatar.style.backgroundImage = '';
+                profileAvatar.style.backgroundSize = '';
+                profileAvatar.style.backgroundPosition = '';
+                profileAvatar.style.borderRadius = '';
+                profileAvatar.style.width = '';
+                profileAvatar.style.height = '';
+            }
+            
+            if (currentAvatar) {
+                currentAvatar.className = 'fas fa-user-circle';
+                currentAvatar.style.backgroundImage = '';
+                currentAvatar.style.backgroundSize = '';
+                currentAvatar.style.backgroundPosition = '';
+                currentAvatar.style.borderRadius = '';
+                currentAvatar.style.width = '';
+                currentAvatar.style.height = '';
+                currentAvatar.style.display = '';
+                
+                // Remove any children elements if reverting to icon
+                currentAvatar.innerHTML = '';
+            }
+        }
     }
     
     // Password change functionality
@@ -380,12 +447,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const currentName = localStorage.getItem('userName') || '';
             editNameInput.value = currentName;
             
-            // Load stored avatar if available, otherwise use default
-            const storedAvatar = localStorage.getItem('userAvatar');
-            if (storedAvatar) {
-                // For now, we'll just continue to use the default icon
-                // In a real implementation, we'd show the actual avatar
-            }
+            // Update avatar display with stored avatar
+            updateAvatarDisplay();
         });
     }
     
@@ -433,13 +496,50 @@ document.addEventListener('DOMContentLoaded', function() {
         avatarUpload.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                // In a real implementation, we'd upload the image to a server
-                // For now, we'll just store a reference to the file or use a default
+                // Check if the file is an image
+                if (!file.type.match('image.*')) {
+                    showNotification('Please select an image file (JPEG, PNG, etc.)', 'error');
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    // Since we're using localStorage and icons, we'll store a reference
-                    // For this implementation, we'll just show a notification
+                    // Store the image data URL in localStorage
+                    localStorage.setItem('userAvatar', event.target.result);
+                    
+                    // Update the profile avatar in the modal
+                    if (currentAvatar) {
+                        currentAvatar.className = 'user-avatar-img'; // Replace the icon class
+                        currentAvatar.style.backgroundImage = `url(${event.target.result})`;
+                        currentAvatar.style.backgroundSize = 'cover';
+                        currentAvatar.style.backgroundPosition = 'center';
+                        currentAvatar.style.borderRadius = '50%';
+                        currentAvatar.style.width = '100%';
+                        currentAvatar.style.height = '100%';
+                        currentAvatar.style.display = 'block';
+                        
+                        // Create a placeholder element for the icon to maintain structure
+                        const iconPlaceholder = document.createElement('div');
+                        iconPlaceholder.style.paddingTop = '100%'; // Maintain aspect ratio
+                        currentAvatar.appendChild(iconPlaceholder);
+                    }
+                    
+                    // Also update the avatar in the profile modal if it's open
+                    const profileAvatar = document.querySelector('.profile-avatar .fas.fa-user-circle');
+                    if (profileAvatar) {
+                        profileAvatar.className = 'user-avatar-img';
+                        profileAvatar.style.backgroundImage = `url(${event.target.result})`;
+                        profileAvatar.style.backgroundSize = 'cover';
+                        profileAvatar.style.backgroundPosition = 'center';
+                        profileAvatar.style.borderRadius = '50%';
+                        profileAvatar.style.width = '100%';
+                        profileAvatar.style.height = '100%';
+                    }
+                    
                     showNotification('Profile picture updated successfully!', 'success');
+                };
+                reader.onerror = function() {
+                    showNotification('Error reading the image file', 'error');
                 };
                 reader.readAsDataURL(file);
             }

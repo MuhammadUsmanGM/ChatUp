@@ -1216,6 +1216,17 @@ body::before {
     justify-content: center;
     font-size: 4rem;
     color: #667eea;
+    position: relative;
+}
+
+.user-avatar-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .profile-details {
@@ -1951,4 +1962,15 @@ body::before {
     .delete-account-actions {
         padding: 0.8rem 0;
     }
+}
+
+/* User avatar image styling */
+.user-avatar-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
 }
