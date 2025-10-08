@@ -5,6 +5,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const sendBtn = document.getElementById('send-btn');
     const messagesContainer = document.getElementById('messages-container');
     const welcomeMessage = document.querySelector('.welcome-message');
+    
+    // Function to handle window resize and orientation change
+    function handleResize() {
+        // Ensure the message container stays scrolled to bottom
+        if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    }
+    
+    // Listen for resize events
+    window.addEventListener('resize', handleResize);
+    
+    // Listen for orientation change (especially important for mobile)
+    window.addEventListener('orientationchange', function() {
+        // Add a small delay to ensure the viewport has fully adjusted
+        setTimeout(handleResize, 100);
+    });
+    
+    // Initialize resize handling
+    handleResize();
 
     // Send message when button is clicked
     if (sendBtn) {
@@ -75,6 +95,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // Scroll to bottom
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
+    
+    // Function to handle window resize and orientation change
+    function handleResize() {
+        // Ensure the message container stays scrolled to bottom
+        if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    }
+    
+    // Listen for resize events
+    window.addEventListener('resize', handleResize);
+    
+    // Listen for orientation change (especially important for mobile)
+    window.addEventListener('orientationchange', function() {
+        // Add a small delay to ensure the viewport has fully adjusted
+        setTimeout(handleResize, 100);
+    });
 
     // Function to show typing indicator
     function showTypingIndicator() {

@@ -68,6 +68,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     localStorage.setItem('userName', backendData.name || email.split('@')[0]);
                     localStorage.setItem('userEmail', backendData.email);
                     localStorage.setItem('isLoggedIn', 'true');
+                    // If join date is not already set, set it (this might be from a previous session)
+                    if (!localStorage.getItem('joinDate')) {
+                        localStorage.setItem('joinDate', new Date().toISOString().split('T')[0]);
+                    }
                     // Clear any pending verification state
                     localStorage.removeItem('pendingVerificationEmail');
                     showChatInterface(backendData.name || email.split('@')[0]);
@@ -145,6 +149,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Store email for potential resend functionality
                     localStorage.setItem('pendingVerificationEmail', email);
+                    // Store join date
+                    localStorage.setItem('joinDate', new Date().toISOString().split('T')[0]);
                     
                     // Display masked email
                     const maskedEmail = maskEmail(email);
@@ -183,6 +189,317 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show auth container and hide chat container
             authContainer.style.display = 'flex';
             chatContainer.style.display = 'none';
+        });
+    }
+    
+    // Profile functionality
+    const profileBtn = document.getElementById('profile-btn');
+    const profileModal = document.getElementById('profile-modal');
+    const closeProfile = document.getElementById('close-profile');
+    const profileName = document.getElementById('profile-name');
+    const profileEmail = document.getElementById('profile-email');
+    const profileJoinDate = document.getElementById('profile-join-date');
+    
+    // Show profile modal
+    if (profileBtn) {
+        profileBtn.addEventListener('click', function() {
+            // Get user data from localStorage
+            const name = localStorage.getItem('userName') || 'User';
+            const email = localStorage.getItem('userEmail') || 'Not available';
+            
+            // Set profile data
+            profileName.textContent = name;
+            profileEmail.textContent = email;
+            
+            // Calculate join date (using registration timestamp if available, or current date as fallback)
+            const joinDate = localStorage.getItem('joinDate') || new Date().toISOString().split('T')[0];
+            profileJoinDate.textContent = formatDate(joinDate);
+            
+            // Show modal
+            profileModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        });
+    }
+    
+    // Close profile modal
+    if (closeProfile) {
+        closeProfile.addEventListener('click', function() {
+            profileModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        });
+    }
+    
+    // Also close modal when clicking outside of it
+    if (profileModal) {
+        profileModal.addEventListener('click', function(e) {
+            if (e.target === profileModal) {
+                profileModal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Re-enable scrolling
+            }
+        });
+    }
+    
+    // Format date function
+    function formatDate(dateString) {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        const date = new Date(dateString);
+        return date.toLocaleDateString(undefined, options);
+    }
+    
+    // Password change functionality
+    const changePasswordBtn = document.getElementById('change-password-btn');
+    const changePasswordModal = document.getElementById('change-password-modal');
+    const closePassword = document.getElementById('close-password');
+    const cancelPassword = document.getElementById('cancel-password');
+    const changePasswordForm = document.getElementById('change-password-form');
+    
+    // Show password change modal
+    if (changePasswordBtn) {
+        changePasswordBtn.addEventListener('click', function() {
+            // Close profile modal and open password change modal
+            document.getElementById('profile-modal').style.display = 'none';
+            changePasswordModal.style.display = 'flex';
+        });
+    }
+    
+    // Close password change modal
+    if (closePassword) {
+        closePassword.addEventListener('click', function() {
+            changePasswordModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        });
+    }
+    
+    if (cancelPassword) {
+        cancelPassword.addEventListener('click', function() {
+            changePasswordModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        });
+    }
+    
+    // Also close modal when clicking outside of it
+    if (changePasswordModal) {
+        changePasswordModal.addEventListener('click', function(e) {
+            if (e.target === changePasswordModal) {
+                changePasswordModal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Re-enable scrolling
+            }
+        });
+    }
+    
+    // Handle password change form submission
+    if (changePasswordForm) {
+        changePasswordForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const oldPassword = document.getElementById('old-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmNewPassword = document.getElementById('confirm-new-password').value;
+            
+            // Validation
+            if (!oldPassword || !newPassword || !confirmNewPassword) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmNewPassword) {
+                showNotification('New passwords do not match', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showNotification('New password must be at least 6 characters long', 'error');
+                return;
+            }
+            
+            // Disable form during submission
+            const submitBtn = changePasswordForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Updating...';
+            submitBtn.disabled = true;
+            
+            try {
+                // Get the user's email from localStorage
+                const userEmail = localStorage.getItem('userEmail');
+                
+                // Call the backend API to change password
+                const response = await fetch('/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}` // Include auth token
+                    },
+                    body: JSON.stringify({
+                        oldPassword: oldPassword,
+                        newPassword: newPassword,
+                        email: userEmail
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showNotification('Password changed successfully!', 'success');
+                    // Reset form
+                    changePasswordForm.reset();
+                    // Close modal
+                    changePasswordModal.style.display = 'none';
+                } else {
+                    showNotification(result.message || 'Failed to change password. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error changing password:', error);
+                showNotification('An error occurred while changing your password. Please try again.', 'error');
+            } finally {
+                // Re-enable form
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    }
+    
+    // Edit profile functionality
+    const editProfileBtn = document.getElementById('edit-profile-btn');
+    const editProfileModal = document.getElementById('edit-profile-modal');
+    const closeEditProfile = document.getElementById('close-edit-profile');
+    const cancelEditProfile = document.getElementById('cancel-edit-profile');
+    const editNameInput = document.getElementById('edit-name');
+    const saveProfileBtn = document.getElementById('save-profile');
+    const avatarUpload = document.getElementById('avatar-upload');
+    const currentAvatar = document.getElementById('current-avatar');
+    const profileAvatarEdit = document.querySelector('.profile-avatar-edit');
+    
+    // Show edit profile modal
+    if (editProfileBtn) {
+        editProfileBtn.addEventListener('click', function() {
+            // Close profile modal and open edit profile modal
+            document.getElementById('profile-modal').style.display = 'none';
+            editProfileModal.style.display = 'flex';
+            
+            // Load current user data
+            const currentName = localStorage.getItem('userName') || '';
+            editNameInput.value = currentName;
+            
+            // Load stored avatar if available, otherwise use default
+            const storedAvatar = localStorage.getItem('userAvatar');
+            if (storedAvatar) {
+                // For now, we'll just continue to use the default icon
+                // In a real implementation, we'd show the actual avatar
+            }
+        });
+    }
+    
+    // Close edit profile modal
+    if (closeEditProfile) {
+        closeEditProfile.addEventListener('click', function() {
+            editProfileModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        });
+    }
+    
+    if (cancelEditProfile) {
+        cancelEditProfile.addEventListener('click', function() {
+            editProfileModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        });
+    }
+    
+    // Update profile display after saving
+    function updateProfileDisplay(name, email) {
+        document.getElementById('profile-name').textContent = name;
+        document.getElementById('profile-email').textContent = email;
+        document.getElementById('username-display').textContent = name;
+    }
+    
+    // Also close modal when clicking outside of it
+    if (editProfileModal) {
+        editProfileModal.addEventListener('click', function(e) {
+            if (e.target === editProfileModal) {
+                editProfileModal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Re-enable scrolling
+            }
+        });
+    }
+    
+    // Avatar click to upload
+    if (profileAvatarEdit) {
+        profileAvatarEdit.addEventListener('click', function() {
+            avatarUpload.click();
+        });
+    }
+    
+    // Handle avatar file selection
+    if (avatarUpload) {
+        avatarUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // In a real implementation, we'd upload the image to a server
+                // For now, we'll just store a reference to the file or use a default
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    // Since we're using localStorage and icons, we'll store a reference
+                    // For this implementation, we'll just show a notification
+                    showNotification('Profile picture updated successfully!', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    // Handle profile save
+    if (saveProfileBtn) {
+        saveProfileBtn.addEventListener('click', async function() {
+            const newName = editNameInput.value.trim();
+            
+            if (!newName) {
+                showNotification('Please enter a name', 'error');
+                return;
+            }
+            
+            // Disable button during save
+            saveProfileBtn.textContent = 'Saving...';
+            saveProfileBtn.disabled = true;
+            
+            try {
+                const userEmail = localStorage.getItem('userEmail');
+                
+                // In a real implementation, this would call a backend API
+                // For now, just update local storage and show success
+                localStorage.setItem('userName', newName);
+                
+                // Call the backend API to update profile (this endpoint needs to be created)
+                const response = await fetch('/update-profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}` // Include auth token
+                    },
+                    body: JSON.stringify({
+                        name: newName,
+                        email: userEmail
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Update name in the profile display as well
+                    updateProfileDisplay(newName, localStorage.getItem('userEmail'));
+                    
+                    showNotification('Profile updated successfully!', 'success');
+                    // Close modal
+                    editProfileModal.style.display = 'none';
+                } else {
+                    showNotification(result.message || 'Failed to update profile. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                showNotification('An error occurred while updating your profile. Please try again.', 'error');
+            } finally {
+                // Re-enable button
+                saveProfileBtn.textContent = 'Save Changes';
+                saveProfileBtn.disabled = false;
+            }
         });
     }
 

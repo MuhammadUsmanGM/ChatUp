@@ -420,6 +420,133 @@ def resend_verification():
             'message': 'An error occurred while resending verification email.'
         }), 500
 
+# Change password endpoint
+@app.route('/change-password', methods=['POST'])
+def change_password():
+    try:
+        # Get the user's token (in a real app, you'd decode the JWT token)
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'success': False,
+                'message': 'Authentication required'
+            }), 401
+        
+        data = request.get_json()
+        old_password = data.get('oldPassword')
+        new_password = data.get('newPassword')
+        email = data.get('email')  # Get email from request
+        
+        if not old_password or not new_password or not email:
+            return jsonify({
+                'success': False,
+                'message': 'Old password, new password, and email are required'
+            }), 400
+        
+        if len(new_password) < 6:
+            return jsonify({
+                'success': False,
+                'message': 'New password must be at least 6 characters long'
+            }), 400
+        
+        # Find the user in the database
+        user = user_collection.find_one({'email': email})
+        if not user:
+            return jsonify({
+                'success': False,
+                'message': 'User not found'
+            }), 404
+        
+        # Verify the old password
+        if not check_password_hash(user['password'], old_password):
+            return jsonify({
+                'success': False,
+                'message': 'Current password is incorrect'
+            }), 401
+        
+        # Hash the new password
+        hashed_new_password = generate_password_hash(new_password, method='pbkdf2:sha256', salt_length=10)
+        
+        # Update the user's password in the database
+        user_collection.update_one(
+            {'_id': user['_id']},
+            {
+                '$set': {
+                    'password': hashed_new_password,
+                    'updatedAt': datetime.now()
+                }
+            }
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Password changed successfully!'
+        }), 200
+        
+    except Exception as e:
+        print(f"Change password error: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while changing your password.'
+        }), 500
+
+# Update profile endpoint
+@app.route('/update-profile', methods=['POST'])
+def update_profile():
+    try:
+        # Get the user's token (in a real app, you'd decode the JWT token)
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'success': False,
+                'message': 'Authentication required'
+            }), 401
+        
+        data = request.get_json()
+        new_name = data.get('name')
+        email = data.get('email')  # Get email from request
+        
+        if not new_name or not email:
+            return jsonify({
+                'success': False,
+                'message': 'Name and email are required'
+            }), 400
+        
+        # Find the user in the database
+        user = user_collection.find_one({'email': email})
+        if not user:
+            return jsonify({
+                'success': False,
+                'message': 'User not found'
+            }), 404
+        
+        # Update the user's name in the database
+        user_collection.update_one(
+            {'_id': user['_id']},
+            {
+                '$set': {
+                    'name': new_name,
+                    'updatedAt': datetime.now()
+                }
+            }
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Profile updated successfully!',
+            'data': {
+                'name': new_name,
+                'email': email
+            }
+        }), 200
+        
+    except Exception as e:
+        print(f"Update profile error: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while updating your profile.'
+        }), 500
+
 
 # Function to send verification email
 def send_verification_email(email, name, token):
