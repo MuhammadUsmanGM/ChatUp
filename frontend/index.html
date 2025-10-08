@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatUp - Advanced Chat Interface</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Authentication Container -->
+    <div id="auth-container" class="auth-container">
+        <div class="form-container">
+            <div class="form-toggle">
+                <button id="login-toggle" class="active">Login</button>
+                <button id="signup-toggle">Sign Up</button>
+            </div>
+            
+            <div id="login-form" class="form-content">
+                <h2>Login to Your Account</h2>
+                <form id="loginForm">
+                    <div class="input-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" name="email" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn primary">Login</button>
+                </form>
+            </div>
+            
+            <div id="signup-form" class="form-content" style="display: none;">
+                <h2>Create New Account</h2>
+                <form id="signupForm">
+                    <div class="input-group">
+                        <label for="signup-name">Full Name</label>
+                        <input type="text" id="signup-name" name="name" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" name="email" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" name="password" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="signup-confirm-password">Confirm Password</label>
+                        <input type="password" id="signup-confirm-password" name="confirm-password" required>
+                    </div>
+                    <button type="submit" class="btn primary">Sign Up</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Container -->
+    <div id="chat-container" class="chat-container" style="display: none;">
+        <div class="chat-header">
+            <div class="header-content">
+                <h1>ChatUp</h1>
+                <div class="user-info">
+                    <span id="username-display">User</span>
+                    <button id="logout-btn" class="btn logout">Logout</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-area">
+            <div class="messages-container" id="messages-container">
+                <!-- Messages will be displayed here -->
+                <div class="welcome-message">
+                    <h2>Welcome to ChatUp!</h2>
+                    <p>How can I assist you today?</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-container">
+            <textarea id="message-input" placeholder="Type your message here..." rows="1"></textarea>
+            <button id="send-btn" class="btn send">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/chat.js"></script>
+</body>
+</html>
