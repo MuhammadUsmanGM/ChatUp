@@ -709,6 +709,10 @@ def js_files(filename):
 def asset_files(filename):
     return send_from_directory('assets', filename)
 
+@app.route('/images/<path:filename>')
+def image_files(filename):
+    return send_from_directory('../images', filename)
+
 if __name__ == '__main__':
     print("Starting server on http://localhost:5000")
     app.run(debug=True, port=5000)

@@ -180,15 +180,67 @@ document.addEventListener('DOMContentLoaded', function() {
     // Logout Functionality
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function() {
+            // Show logout confirmation modal
+            const logoutModal = document.getElementById('logout-modal');
+            const closeLogout = document.getElementById('close-logout');
+            const cancelLogout = document.getElementById('cancel-logout');
+            const confirmLogout = document.getElementById('confirm-logout');
+            
+            // Show the modal
+            logoutModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        });
+    }
+    
+    // Handle logout confirmation modal
+    const logoutModal = document.getElementById('logout-modal');
+    const closeLogout = document.getElementById('close-logout');
+    const cancelLogout = document.getElementById('cancel-logout');
+    const confirmLogout = document.getElementById('confirm-logout');
+    
+    // Close logout modal events
+    if (closeLogout) {
+        closeLogout.addEventListener('click', function() {
+            logoutModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        });
+    }
+    
+    if (cancelLogout) {
+        cancelLogout.addEventListener('click', function() {
+            logoutModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        });
+    }
+    
+    // Also close modal when clicking outside of it
+    if (logoutModal) {
+        logoutModal.addEventListener('click', function(e) {
+            if (e.target === logoutModal) {
+                logoutModal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Re-enable scrolling
+            }
+        });
+    }
+    
+    // Confirm logout event
+    if (confirmLogout) {
+        confirmLogout.addEventListener('click', function() {
             // Clear user data
             localStorage.removeItem('isLoggedIn');
             localStorage.removeItem('userName');
             localStorage.removeItem('userEmail');
             localStorage.removeItem('authToken');
+            localStorage.removeItem('joinDate');
+            localStorage.removeItem('pendingVerificationEmail');
             
             // Show auth container and hide chat container
             authContainer.style.display = 'flex';
             chatContainer.style.display = 'none';
+            
+            // Close the modal
+            logoutModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
         });
     }
     
