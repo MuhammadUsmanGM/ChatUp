@@ -143,6 +143,7 @@
             <div class="profile-actions">
                 <button id="edit-profile-btn" class="btn secondary">Edit Profile</button>
                 <button id="change-password-btn" class="btn secondary">Change Password</button>
+                <button id="delete-account-btn" class="btn danger">Delete Account</button>
             </div>
         </div>
     </div>
@@ -205,6 +206,33 @@
             <div class="profile-actions">
                 <button id="cancel-edit-profile" class="btn secondary">Cancel</button>
                 <button id="save-profile" class="btn primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Account Confirmation Modal -->
+    <div id="delete-account-modal" class="modal-overlay" style="display: none;">
+        <div class="delete-account-modal">
+            <div class="delete-account-header">
+                <h2>Delete Account</h2>
+                <button id="close-delete-account" class="close-btn">&times;</button>
+            </div>
+            <div class="delete-account-content">
+                <div class="warning-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Are you sure you want to delete your account? This action is permanent and cannot be undone.</p>
+                </div>
+                <div class="input-group">
+                    <label for="delete-password"><i class="fas fa-lock"></i> Confirm Password</label>
+                    <input type="password" id="delete-password" name="deletePassword" placeholder="Enter your password" required>
+                </div>
+                <div class="delete-account-warning">
+                    <p>All your data will be permanently deleted. This action cannot be reversed.</p>
+                </div>
+            </div>
+            <div class="delete-account-actions">
+                <button id="cancel-delete-account" class="btn secondary">Cancel</button>
+                <button id="confirm-delete-account" class="btn danger">Delete Account</button>
             </div>
         </div>
     </div>

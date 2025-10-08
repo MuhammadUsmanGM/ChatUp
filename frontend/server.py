@@ -607,6 +607,65 @@ def send_verification_email(email, name, token):
         return False
 
 
+# Delete account endpoint
+@app.route('/delete-account', methods=['DELETE'])
+def delete_account():
+    try:
+        # Get the user's token (in a real app, you'd decode the JWT token)
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'success': False,
+                'message': 'Authentication required'
+            }), 401
+        
+        data = request.get_json()
+        email = data.get('email')  # Get email from request
+        password = data.get('password')  # Get password from request
+        
+        if not email or not password:
+            return jsonify({
+                'success': False,
+                'message': 'Email and password are required'
+            }), 400
+        
+        # Find the user in the database
+        user = user_collection.find_one({'email': email})
+        if not user:
+            return jsonify({
+                'success': False,
+                'message': 'User not found'
+            }), 404
+        
+        # Verify the password
+        if not check_password_hash(user['password'], password):
+            return jsonify({
+                'success': False,
+                'message': 'Password is incorrect'
+            }), 401
+        
+        # Delete the user from the database
+        result = user_collection.delete_one({'_id': user['_id']})
+        
+        if result.deleted_count == 1:
+            return jsonify({
+                'success': True,
+                'message': 'Account deleted successfully!'
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Failed to delete account. Please try again.'
+            }), 500
+        
+    except Exception as e:
+        print(f"Delete account error: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while deleting your account.'
+        }), 500
+
+
 # Chat endpoint that integrates with the backend agent
 @app.route('/chat', methods=['POST'])
 def chat():

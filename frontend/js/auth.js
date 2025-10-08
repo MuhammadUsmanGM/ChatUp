@@ -502,6 +502,116 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Delete account functionality
+    const deleteAccountBtn = document.getElementById('delete-account-btn');
+    const deleteAccountModal = document.getElementById('delete-account-modal');
+    const closeDeleteAccount = document.getElementById('close-delete-account');
+    const cancelDeleteAccount = document.getElementById('cancel-delete-account');
+    const confirmDeleteAccount = document.getElementById('confirm-delete-account');
+    const deletePasswordInput = document.getElementById('delete-password');
+    
+    // Show delete account modal
+    if (deleteAccountBtn) {
+        deleteAccountBtn.addEventListener('click', function() {
+            // Close profile modal and open delete account modal
+            document.getElementById('profile-modal').style.display = 'none';
+            deleteAccountModal.style.display = 'flex';
+            deletePasswordInput.value = ''; // Clear password field
+        });
+    }
+    
+    // Close delete account modal
+    if (closeDeleteAccount) {
+        closeDeleteAccount.addEventListener('click', function() {
+            deleteAccountModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+            deletePasswordInput.value = ''; // Clear password field
+        });
+    }
+    
+    if (cancelDeleteAccount) {
+        cancelDeleteAccount.addEventListener('click', function() {
+            deleteAccountModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+            deletePasswordInput.value = ''; // Clear password field
+        });
+    }
+    
+    // Also close modal when clicking outside of it
+    if (deleteAccountModal) {
+        deleteAccountModal.addEventListener('click', function(e) {
+            if (e.target === deleteAccountModal) {
+                deleteAccountModal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Re-enable scrolling
+                deletePasswordInput.value = ''; // Clear password field
+            }
+        });
+    }
+    
+    // Handle account deletion
+    if (confirmDeleteAccount) {
+        confirmDeleteAccount.addEventListener('click', async function() {
+            const password = deletePasswordInput.value.trim();
+            
+            if (!password) {
+                showNotification('Please enter your password', 'error');
+                return;
+            }
+            
+            // Disable button during deletion
+            confirmDeleteAccount.textContent = 'Deleting...';
+            confirmDeleteAccount.disabled = true;
+            
+            try {
+                const userEmail = localStorage.getItem('userEmail');
+                
+                // Call the backend API to delete the account
+                const response = await fetch('/delete-account', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}` // Include auth token
+                    },
+                    body: JSON.stringify({
+                        email: userEmail,
+                        password: password
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showNotification('Account deleted successfully!', 'success');
+                    // Clear user data
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('userName');
+                    localStorage.removeItem('userEmail');
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('joinDate');
+                    localStorage.removeItem('pendingVerificationEmail');
+                    
+                    // Show auth container and hide chat container
+                    document.getElementById('auth-container').style.display = 'flex';
+                    document.getElementById('chat-container').style.display = 'none';
+                    
+                    // Close modal
+                    deleteAccountModal.style.display = 'none';
+                    document.body.style.overflow = 'auto'; // Re-enable scrolling
+                    deletePasswordInput.value = ''; // Clear password field
+                } else {
+                    showNotification(result.message || 'Failed to delete account. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting account:', error);
+                showNotification('An error occurred while deleting your account. Please try again.', 'error');
+            } finally {
+                // Re-enable button
+                confirmDeleteAccount.textContent = 'Delete Account';
+                confirmDeleteAccount.disabled = false;
+            }
+        });
+    }
 
     // Initialize app
     initializeApp();
