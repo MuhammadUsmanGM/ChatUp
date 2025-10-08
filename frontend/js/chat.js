@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Function to send message
-    function sendMessage() {
+    async function sendMessage() {
         const message = messageInput.value.trim();
         
         if (message) {
@@ -36,11 +36,18 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show typing indicator
             showTypingIndicator();
             
-            // Simulate bot response after a delay
-            setTimeout(() => {
+            try {
+                // Get bot response from backend agent
+                const botResponse = await sendToBackend(message);
+                
+                // Hide typing indicator and add bot response
                 hideTypingIndicator();
-                generateBotResponse(message);
-            }, 1000);
+                addMessage(botResponse, 'bot');
+            } catch (error) {
+                console.error('Error getting bot response:', error);
+                hideTypingIndicator();
+                addMessage("Sorry, I'm having trouble connecting to the server.", 'bot');
+            }
         }
     }
 

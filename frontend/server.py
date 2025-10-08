@@ -4,6 +4,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
 from flask_cors import CORS
+import subprocess
+import sys
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend communication
@@ -144,29 +146,7 @@ def login():
             'message': 'Login failed due to server error'
         }), 500
 
-# Chat endpoint (placeholder for now)
-@app.route('/chat', methods=['POST'])
-def chat():
-    try:
-        data = request.get_json()
-        message = data.get('message')
-        
-        # Log the incoming message for debugging
-        print(f"Received chat message: {message}")
-        
-        # Process the chat message (simple echo for now)
-        # You can enhance this with your ChatUp logic
-        bot_response = f"I received your message: '{message}'. This is a placeholder response from the backend."
-        
-        return jsonify({
-            'response': bot_response
-        }), 200
-        
-    except Exception as e:
-        print(f"Chat error: {e}")
-        return jsonify({
-            'response': "Sorry, I'm having trouble processing your message right now."
-        }), 500
+
 
 # Health check endpoint
 @app.route('/health', methods=['GET'])
@@ -195,6 +175,142 @@ def test_db():
         return jsonify({
             'success': False,
             'message': 'Database connection failed'
+        }), 500
+
+
+import subprocess
+import sys
+import os
+import tempfile
+
+# Function to run the agent with a given input
+def run_chat_agent(user_input):
+    """
+    Runs the chat agent with the provided input and returns the response.
+    This function executes the agent in a separate Python process to avoid asyncio issues.
+    """
+    try:
+        # Path to the backend directory
+        backend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'backend')
+        
+        # Create a temporary script to run the agent
+        temp_script_content = f'''import sys
+import os
+sys.path.insert(0, r'{backend_path}')
+
+# Change to the backend directory to load .env properly
+original_cwd = os.getcwd()
+os.chdir(r'{backend_path}')
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()  # Load environment variables
+    
+    # Import the required modules with fallbacks
+    try:
+        from agents import Agent, Runner, AsyncOpenAI, set_default_openai_client, set_tracing_disabled, OpenAIChatCompletionsModel, set_default_openai_api
+    except ImportError:
+        try:
+            from openai_agents import Agent, Runner, AsyncOpenAI, set_default_openai_client, set_tracing_disabled, OpenAIChatCompletionsModel, set_default_openai_api
+        except ImportError:
+            from agently import Agent, Runner, AsyncOpenAI, set_default_openai_client, set_tracing_disabled, OpenAIChatCompletionsModel, set_default_openai_api
+    
+    # Initialize the API client
+    import os
+    gemini_api_key = os.getenv("GEMINI_API_KEY")
+    if not gemini_api_key:
+        print("ERROR: API key not found")
+        sys.exit(1)
+    
+    external_client = AsyncOpenAI(
+        api_key=gemini_api_key,
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+    )
+    set_default_openai_client(external_client)
+    set_default_openai_api("chat_completions")
+    set_tracing_disabled(True)
+    model = OpenAIChatCompletionsModel(
+        model="gemini-2.0-flash",
+        openai_client=external_client
+    )
+
+    # Create and run the agent with the user input
+    agent = Agent(
+        name="Assistant",
+        instructions="A helpful assistant.",
+        model=model
+    )
+    result = Runner.run_sync(
+        starting_agent=agent,
+        input="{user_input}"
+    )
+    
+    print(result.final_output, end='')  # Print result without extra newline
+    
+except Exception as e:
+    print(f"ERROR: {{str(e)}}")
+finally:
+    os.chdir(original_cwd)  # Restore original working directory
+'''
+        
+        # Create and execute the temporary script
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as temp_file:
+            temp_file.write(temp_script_content)
+            temp_script_path = temp_file.name
+
+        # Execute the temporary script
+        result = subprocess.run(
+            [sys.executable, temp_script_path], 
+            capture_output=True, 
+            text=True, 
+            timeout=30  # 30 second timeout
+        )
+        
+        # Clean up the temporary script
+        os.unlink(temp_script_path)
+        
+        if result.returncode == 0:
+            # Return the response, stripping "ERROR:" if it's not actually an error
+            output = result.stdout.strip()
+            if output.startswith("ERROR:"):
+                print(f"Agent execution error: {output}")
+                return "I'm having trouble processing your request. Please try again later."
+            return output
+        else:
+            print(f"Agent execution error: {result.stderr}")
+            return "I'm having trouble processing your request. Please try again later."
+            
+    except subprocess.TimeoutExpired:
+        print("Agent execution timed out")
+        return "The request is taking too long to process. Please try again."
+    except Exception as e:
+        print(f"Chat agent error: {e}")
+        import traceback
+        traceback.print_exc()
+        return "I'm having trouble connecting to the chat agent. Please try again later."
+
+
+# Chat endpoint that integrates with the backend agent
+@app.route('/chat', methods=['POST'])
+def chat():
+    try:
+        data = request.get_json()
+        message = data.get('message')
+        
+        # Log the incoming message for debugging
+        print(f"Received chat message: {message}")
+        
+        # Get response from the backend agent
+        bot_response = run_chat_agent(message)
+        
+        return jsonify({
+            'response': bot_response
+        }), 200
+        
+    except Exception as e:
+        print(f"Chat error: {e}")
+        return jsonify({
+            'response': "Sorry, I'm having trouble processing your message right now."
         }), 500
 
 from flask import send_from_directory
