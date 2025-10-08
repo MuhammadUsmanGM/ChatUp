@@ -25,6 +25,44 @@ document.addEventListener('DOMContentLoaded', function() {
         currentChatId = storedCurrentChatId;
     }
     
+    // Set up default sidebar state if not already set
+    if (!localStorage.getItem('sidebarState')) {
+        // Set sidebar as visible by default on first visit
+        localStorage.setItem('sidebarState', 'visible');
+        // Do not add 'hidden' class since we want it visible by default
+        sidebar.classList.remove('hidden');
+        
+        // Update icon to show left arrow since sidebar is initially visible
+        const toggleIcon = toggleSidebarBtn.querySelector('i');
+        if (toggleIcon) {
+            toggleIcon.classList.remove('fa-chevron-right');
+            toggleIcon.classList.add('fa-chevron-left');
+        }
+        
+        // Remove class to hide show-sidebar button 
+        document.querySelector('.main-chat').classList.remove('hidden-sidebar');
+    } else {
+        // Apply saved sidebar state
+        const savedState = localStorage.getItem('sidebarState');
+        if (savedState === 'hidden') {
+            sidebar.classList.add('hidden');
+            const toggleIcon = toggleSidebarBtn.querySelector('i');
+            if (toggleIcon) {
+                toggleIcon.classList.remove('fa-chevron-left');
+                toggleIcon.classList.add('fa-chevron-right');
+            }
+            document.querySelector('.main-chat').classList.add('hidden-sidebar');
+        } else {
+            sidebar.classList.remove('hidden');
+            const toggleIcon = toggleSidebarBtn.querySelector('i');
+            if (toggleIcon) {
+                toggleIcon.classList.remove('fa-chevron-right');
+                toggleIcon.classList.add('fa-chevron-left');
+            }
+            document.querySelector('.main-chat').classList.remove('hidden-sidebar');
+        }
+    }
+    
     // Sidebar toggle functionality
     if (toggleSidebarBtn) {
         toggleSidebarBtn.addEventListener('click', function() {
@@ -36,11 +74,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon.classList.add('fa-chevron-right');
                 // Add class to main chat area to show show-sidebar button
                 document.querySelector('.main-chat').classList.add('hidden-sidebar');
+                // Save state to localStorage
+                localStorage.setItem('sidebarState', 'hidden');
             } else {
                 icon.classList.remove('fa-chevron-right');
                 icon.classList.add('fa-chevron-left');
                 // Remove class to hide show-sidebar button
                 document.querySelector('.main-chat').classList.remove('hidden-sidebar');
+                // Save state to localStorage
+                localStorage.setItem('sidebarState', 'visible');
             }
         });
     }
@@ -55,6 +97,8 @@ document.addEventListener('DOMContentLoaded', function() {
             icon.classList.add('fa-chevron-left');
             // Remove class to hide show-sidebar button
             document.querySelector('.main-chat').classList.remove('hidden-sidebar');
+            // Save state to localStorage
+            localStorage.setItem('sidebarState', 'visible');
         });
     }
     
@@ -248,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 chatHistory[chatIndex].lastMessage = text;
                 chatHistory[chatIndex].timestamp = new Date().toISOString();
                 // If it's the first message in a new chat, set the title to the first message
-                if (!chatHistory[chatIndex].title || chatHistory[chatIndex].title.startsWith('New Chat')) {
+                if (!chatHistory[chatIndex].title || chatHistory[chatIndex].title === 'New Chat') {
                     chatHistory[chatIndex].title = text.substring(0, 30) + (text.length > 30 ? '...' : '');
                 }
                 localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
@@ -467,30 +511,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Function to add a message to the chat
-    function addMessage(text, sender) {
-        // Remove welcome message if it's the first interaction
-        if (welcomeMessage) {
-            welcomeMessage.style.display = 'none';
-        }
-        
-        const messageDiv = document.createElement('div');
-        messageDiv.classList.add('message', sender);
-        
-        // Add message content with proper formatting
-        messageDiv.textContent = text;
-        
-        messagesContainer.appendChild(messageDiv);
-        
-        // Add visual effect for new messages
-        messageDiv.style.animation = 'none';
-        setTimeout(() => {
-            messageDiv.style.animation = 'slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        }, 10);
-        
-        // Scroll to bottom
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
+
     
     // Function to handle window resize and orientation change
     function handleResize() {
