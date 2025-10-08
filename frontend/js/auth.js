@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Form Toggle Functionality
     loginToggle.addEventListener('click', function() {
+        const formToggle = document.querySelector('.form-toggle');
+        formToggle.classList.remove('signup-mode');
+        formToggle.classList.add('login-mode');
+        
         loginToggle.classList.add('active');
         signupToggle.classList.remove('active');
         document.getElementById('login-form').style.display = 'block';
@@ -21,6 +25,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     signupToggle.addEventListener('click', function() {
+        const formToggle = document.querySelector('.form-toggle');
+        formToggle.classList.remove('login-mode');
+        formToggle.classList.add('signup-mode');
+        
         signupToggle.classList.add('active');
         loginToggle.classList.remove('active');
         document.getElementById('signup-form').style.display = 'block';

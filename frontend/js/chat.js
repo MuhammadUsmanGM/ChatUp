@@ -53,9 +53,17 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const messageDiv = document.createElement('div');
         messageDiv.classList.add('message', sender);
+        
+        // Add message content with proper formatting
         messageDiv.textContent = text;
         
         messagesContainer.appendChild(messageDiv);
+        
+        // Add visual effect for new messages
+        messageDiv.style.animation = 'none';
+        setTimeout(() => {
+            messageDiv.style.animation = 'slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        }, 10);
         
         // Scroll to bottom
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
