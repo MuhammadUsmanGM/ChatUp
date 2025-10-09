@@ -929,7 +929,18 @@ document.addEventListener('DOMContentLoaded', function() {
     function initializeApp() {
         if (localStorage.getItem('isLoggedIn') === 'true') {
             const name = localStorage.getItem('userName') || 'User';
-            showChatInterface(name);
+            
+            // Check if this is a page refresh (same browser session) or a new visit after closing the site
+            // sessionStorage is cleared when all tabs are closed and browser is restarted
+            if (sessionStorage.getItem('activeSession')) {
+                // This appears to be a page refresh within the same browser session
+                // Show the chat interface normally without creating a new chat
+                showChatInterfaceRefresh(name);
+            } else {
+                // This is a new visit after closing the site (sessionStorage was cleared)
+                // Show chat interface with a new chat
+                showChatInterface(name);
+            }
         } else {
             // Check if user just registered and is waiting for verification
             const pendingEmail = localStorage.getItem('pendingVerificationEmail');
@@ -950,7 +961,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Show chat interface
+    // Show chat interface with a new chat (for new login sessions)
     function showChatInterface(userName) {
         if (usernameDisplay) {
             usernameDisplay.textContent = userName;
@@ -958,7 +969,29 @@ document.addEventListener('DOMContentLoaded', function() {
         authContainer.style.display = 'none';
         chatContainer.style.display = 'flex';
         
-        // Load chat history if chat.js is loaded
+        // Mark that we're in an active session to distinguish between new login and refresh
+        sessionStorage.setItem('activeSession', 'true');
+        
+        // Create a new chat when user logs in (first time in this browser session), keeping old chats in history
+        if (window.createNewChat) {
+            window.createNewChat();
+        } else {
+            // Fallback: load chat history if createNewChat function is not available
+            if (window.loadChatHistory) {
+                window.loadChatHistory();
+            }
+        }
+    }
+    
+    // Show chat interface and continue with current chat (for refreshes within same session)
+    function showChatInterfaceRefresh(userName) {
+        if (usernameDisplay) {
+            usernameDisplay.textContent = userName;
+        }
+        authContainer.style.display = 'none';
+        chatContainer.style.display = 'flex';
+        
+        // Load chat history normally (preserving the current chat)
         if (window.loadChatHistory) {
             window.loadChatHistory();
         }

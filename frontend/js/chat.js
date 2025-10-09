@@ -423,6 +423,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Make functions available globally so they can be used by other scripts
     window.addMessage = addMessage;
     window.loadChatHistory = loadChatHistory;
+    window.createNewChat = createNewChat;
     
     // Function to handle window resize and orientation change
     function handleResize() {
