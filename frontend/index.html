@@ -7,6 +7,169 @@
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+  /* Theme Toggle Button - Perfectly round with glass effect */
+  #theme-toggle {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    color: #333 !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    max-width: 44px !important;
+    max-height: 44px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    position: absolute !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    font-size: 1rem !important;
+    z-index: 1000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: 
+      0 8px 32px 0 rgba(31, 38, 135, 0.2) !important,
+      inset 0 4px 10px rgba(255, 255, 255, 0.2) !important;
+    outline: 1px solid rgba(255, 255, 255, 0.18) !important;
+  }
+
+  #theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    transform: scale(1.1) !important;
+    box-shadow: 
+      0 8px 32px 0 rgba(31, 38, 135, 0.25) !important,
+      inset 0 4px 15px rgba(255, 255, 255, 0.3) !important;
+  }
+
+  [data-theme="dark"] #theme-toggle {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    color: #e0e0e0 !important;
+    box-shadow: 
+      0 8px 32px 0 rgba(0, 0, 0, 0.3) !important,
+      inset 0 4px 10px rgba(255, 255, 255, 0.1) !important;
+  }
+
+  [data-theme="dark"] #theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 
+      0 8px 32px 0 rgba(0, 0, 0, 0.4) !important,
+      inset 0 4px 15px rgba(255, 255, 255, 0.15) !important;
+  }
+
+  /* Theme Toggle Button in Chat User Info */
+  .user-info #theme-toggle {
+    position: static !important;
+    margin-right: 1rem !important;
+    top: auto !important;
+    right: auto !important;
+  }
+
+  /* Theme Variables */
+  :root {
+    --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --bg-secondary: linear-gradient(135deg, #f0f4f8 0%, #e6e9f0 100%);
+    --bg-container: rgba(255, 255, 255, 0.95);
+    --bg-sidebar: rgba(255, 255, 255, 0.95);
+    --bg-input: #f9f9f9;
+    --bg-input-focus: white;
+    --text-primary: #333;
+    --text-secondary: #666;
+    --text-light: #888;
+    --border-color: #e0e0e0;
+    --border-light: rgba(0, 0, 0, 0.05);
+    --accent-primary: #667eea;
+    --accent-secondary: #764ba2;
+    --accent-gradient: linear-gradient(135deg, #667eea, #764ba2);
+    --shadow-light: 0 4px 10px rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 5px 15px rgba(0, 0, 0, 0.1);
+    --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.15);
+    --danger: #ff6b6b;
+    --success: #4CAF50;
+    --info: #2196F3;
+  }
+
+  /* Dark theme variables */
+  [data-theme="dark"] {
+    --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    --bg-secondary: linear-gradient(135deg, #0f2027 0%, #1a2a3a 100%);
+    --bg-container: rgba(25, 25, 35, 0.95);
+    --bg-sidebar: rgba(25, 25, 35, 0.95);
+    --bg-input: rgba(45, 45, 60, 0.8);
+    --bg-input-focus: rgba(55, 55, 70, 0.9);
+    --text-primary: #f0f0f0;
+    --text-secondary: #c0c0c0;
+    --text-light: #a0a0a0;
+    --border-color: #4a4d6a;
+    --border-light: rgba(255, 255, 255, 0.08);
+    --accent-primary: #6a8eff;
+    --accent-secondary: #7d9cff;
+    --accent-gradient: linear-gradient(135deg, #6a8eff, #7d9cff, #8a9bff);
+    --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.5);
+    --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.6);
+    --danger: #ff6b6b;
+    --success: #50fa7b;
+    --info: #79d3ff;
+  }
+
+  /* Apply smooth transitions */
+  * {
+    transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease !important;
+  }
+  
+  /* Apply theme to main elements */
+  body {
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+  }
+  
+  .auth-container {
+    background: rgba(255, 255, 255, 0.05) !important;
+  }
+  
+  .form-container {
+    background: var(--bg-container) !important;
+  }
+  
+  .chat-container {
+    background: var(--bg-secondary) !important;
+  }
+  
+  .sidebar {
+    background: var(--bg-sidebar) !important;
+  }
+  
+  .chat-header {
+    background: var(--bg-container) !important;
+  }
+  
+  .input-container {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.18) !important;
+    box-shadow: 
+      0 8px 32px 0 rgba(31, 38, 135, 0.15) !important,
+      inset 0 4px 10px rgba(255, 255, 255, 0.2) !important;
+  }
+  
+  [data-theme="dark"] .input-container {
+    background: rgba(25, 25, 35, 0.25) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 
+      0 8px 32px 0 rgba(0, 0, 0, 0.3) !important,
+      inset 0 4px 10px rgba(255, 255, 255, 0.05) !important;
+  }
+</style>
 </head>
 <body>
     <!-- Authentication Container -->
@@ -18,6 +181,9 @@
                     <img src="/images/Logo.png" alt="ChatUp Logo" class="auth-logo">
                 </div>
                 <h1 class="app-name">ChatUp</h1>
+                <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Theme" style="position: absolute; top: 1rem; right: 1rem;">
+                    <i class="fas fa-moon"></i>
+                </button>
             </div>
             
             <!-- Login/Signup Form -->
@@ -134,6 +300,9 @@
                     <div class="header-content">
                         <h1>ChatUp</h1>
                         <div class="user-info">
+                            <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Theme">
+                                <i class="fas fa-moon"></i>
+                            </button>
                             <span id="username-display">User</span>
                             <button id="profile-btn" class="btn profile" title="View Profile">
                                 <i class="fas fa-user-circle"></i>
@@ -378,7 +547,58 @@
         </div>
     </div>
 
-    <script src="js/auth.js"></script>
+    <script>
+    // Simple and reliable theme toggle functionality
+    (function() {
+        'use strict';
+        
+        // Apply saved theme on page load
+        window.addEventListener('load', function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            // Update all toggle buttons with correct icons
+            updateAllToggleIcons(savedTheme);
+        });
+        
+        // Global click handler for theme toggle buttons
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('#theme-toggle')) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                // Apply new theme
+                document.documentElement.setAttribute('data-theme', newTheme);
+                
+                // Save theme preference
+                localStorage.setItem('theme', newTheme);
+                
+                // Update all toggle buttons
+                updateAllToggleIcons(newTheme);
+            }
+        });
+        
+        function updateAllToggleIcons(theme) {
+            const allToggles = document.querySelectorAll('#theme-toggle');
+            allToggles.forEach(function(btn) {
+                const icon = btn.querySelector('i.fas');
+                if (icon) {
+                    if (theme === 'dark') {
+                        icon.className = 'fas fa-sun';
+                        btn.title = 'Switch to Light Theme';
+                    } else {
+                        icon.className = 'fas fa-moon';
+                        btn.title = 'Switch to Dark Theme';
+                    }
+                }
+            });
+        }
+    })();
+</script>
+<script src="js/auth.js"></script>
     <script src="js/chat.js"></script>
 </body>
 </html>
