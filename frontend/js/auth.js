@@ -100,6 +100,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     localStorage.removeItem('pendingVerificationEmail');
                     showChatInterface(backendData.name || email.split('@')[0]);
                     showNotification('Login successful!', 'success');
+                    
+                    // Load user's chat history after login
+                    if (window.loadUserChatHistory) {
+                        setTimeout(() => {
+                            window.loadUserChatHistory();
+                        }, 500); // Small delay to ensure interface is ready
+                    } else if (window.loadChatHistory) {
+                        setTimeout(() => {
+                            window.loadChatHistory();
+                        }, 500); // Small delay to ensure interface is ready
+                    }
                 } else {
                     // Check if the error is related to email verification
                     if (response.message && response.message.includes('verify your email')) {
@@ -278,6 +289,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Confirm logout event
     if (confirmLogout) {
         confirmLogout.addEventListener('click', function() {
+            // Clear any existing user-specific chat history from localStorage
+            // We need to check what user was previously logged in to clear their specific history
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('chat_history_')) {
+                    localStorage.removeItem(key);
+                }
+            }
+            
             // Clear user data
             localStorage.removeItem('isLoggedIn');
             localStorage.removeItem('userName');
@@ -285,6 +305,8 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.removeItem('authToken');
             localStorage.removeItem('joinDate');
             localStorage.removeItem('pendingVerificationEmail');
+            localStorage.removeItem('currentChatId');
+            localStorage.removeItem('chatHistory'); // Clear any old format chat history
             
             // Show auth container and hide chat container
             authContainer.style.display = 'flex';
@@ -1220,14 +1242,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Mark that we're in an active session to distinguish between new login and refresh
         sessionStorage.setItem('activeSession', 'true');
         
-        // Create a new chat when user logs in (first time in this browser session), keeping old chats in history
-        if (window.createNewChat) {
-            window.createNewChat();
-        } else {
-            // Fallback: load chat history if createNewChat function is not available
-            if (window.loadChatHistory) {
-                window.loadChatHistory();
-            }
+        // Load user's chat history from the database
+        if (window.loadUserChatHistory) {
+            window.loadUserChatHistory();
+        } else if (window.loadChatHistory) {
+            window.loadChatHistory();
         }
     }
     
@@ -1239,8 +1258,10 @@ document.addEventListener('DOMContentLoaded', function() {
         authContainer.style.display = 'none';
         chatContainer.style.display = 'flex';
         
-        // Load chat history normally (preserving the current chat)
-        if (window.loadChatHistory) {
+        // Load user's chat history from the database
+        if (window.loadUserChatHistory) {
+            window.loadUserChatHistory();
+        } else if (window.loadChatHistory) {
             window.loadChatHistory();
         }
     }

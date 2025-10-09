@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
+from bson import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
@@ -724,12 +725,30 @@ def chat():
     try:
         data = request.get_json()
         message = data.get('message')
+        user_email = data.get('userId')  # Get user email from frontend
         
         # Log the incoming message for debugging
-        print(f"Received chat message: {message}")
+        print(f"Received chat message from {user_email}: {message}")
         
         # Get response from the backend agent
         bot_response = run_chat_agent(message)
+        
+        # Save chat to database
+        if user_email:  # Only save if we have user identification
+            # Create or add to a chat session
+            # We'll create a new chat for each conversation (as each POST represents a new conversation)
+            chat_entry = {
+                'user_email': user_email,
+                'timestamp': datetime.now(),
+                'title': message[:50] + "..." if len(message) > 50 else message,  # Use first part of message as title
+                'messages': [
+                    {'sender': 'user', 'text': message, 'timestamp': datetime.now()},
+                    {'sender': 'bot', 'text': bot_response, 'timestamp': datetime.now()}
+                ]
+            }
+            
+            # Create new chat document
+            result = chat_history_collection.insert_one(chat_entry)
         
         return jsonify({
             'response': bot_response
@@ -739,6 +758,98 @@ def chat():
         print(f"Chat error: {e}")
         return jsonify({
             'response': "Sorry, I'm having trouble processing your message right now."
+        }), 500
+
+
+# Endpoint to get user's chat history
+@app.route('/chat-history', methods=['GET'])
+def get_chat_history():
+    try:
+        # Get user email from authorization header
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'success': False,
+                'message': 'Authentication required'
+            }), 401
+            
+        # Get user email from request params or decode from token (simplified for demo)
+        user_email = request.args.get('user_email')
+        if not user_email:
+            return jsonify({
+                'success': False,
+                'message': 'User email is required'
+            }), 400
+
+        # Get chat history for the user from the database
+        chats = list(chat_history_collection.find({
+            'user_email': user_email
+        }).sort('timestamp', -1).limit(50))  # Get last 50 chats, most recent first
+        
+        # Format the results
+        formatted_chats = []
+        for chat in chats:
+            formatted_chats.append({
+                'id': str(chat['_id']),
+                'timestamp': chat['timestamp'].isoformat(),
+                'messages': chat['messages']
+            })
+        
+        return jsonify({
+            'success': True,
+            'chats': formatted_chats
+        }), 200
+        
+    except Exception as e:
+        print(f"Get chat history error: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'Failed to retrieve chat history'
+        }), 500
+
+
+# Endpoint to delete user's chat history
+@app.route('/chat-history/<chat_id>', methods=['DELETE'])
+def delete_chat_history(chat_id):
+    try:
+        # Get user email from authorization header
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'success': False,
+                'message': 'Authentication required'
+            }), 401
+            
+        # Get user email from request params or decode from token (simplified for demo)
+        user_email = request.args.get('user_email')
+        if not user_email:
+            return jsonify({
+                'success': False,
+                'message': 'User email is required'
+            }), 400
+
+        # Delete specific chat for the user
+        result = chat_history_collection.delete_one({
+            '_id': ObjectId(chat_id),
+            'user_email': user_email
+        })
+        
+        if result.deleted_count > 0:
+            return jsonify({
+                'success': True,
+                'message': 'Chat deleted successfully'
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Chat not found or you do not have permission to delete it'
+            }), 404
+        
+    except Exception as e:
+        print(f"Delete chat history error: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'Failed to delete chat history'
         }), 500
 
 from flask import send_from_directory

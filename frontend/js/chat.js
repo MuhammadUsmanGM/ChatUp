@@ -16,8 +16,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Current chat ID
     let currentChatId = null;
     
-    // Initialize chat history from localStorage if available
-    loadChatHistory();
+    // Load user's chat history from database
+    loadUserChatHistory();
     
     // Also check for a current chat when the page loads
     const storedCurrentChatId = localStorage.getItem('currentChatId');
@@ -154,21 +154,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Function to load chat history from localStorage
+    // Function to load chat history from localStorage (now it's loaded via API)
+    // This is kept for backward compatibility but uses new functions
     function loadChatHistory() {
-        const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-        updateChatHistoryList();
+        // Load user's chat history from database
+        loadUserChatHistory();
         
         // If there's a current chat in localStorage, load it
         const currentChat = localStorage.getItem('currentChatId');
         if (currentChat) {
-            currentChatId = currentChat;
-            loadChat(currentChatId);
-        } else if (chatHistory.length > 0) {
-            // If no current chat but history exists, load the first chat
-            currentChatId = chatHistory[0].id;
-            loadChat(currentChatId);
-        }
+            loadChat(currentChat);
+        } 
+        // Note: We don't load the first chat automatically anymore as we want to 
+        // wait for the database response before populating the UI
     }
     
     // Function to update the chat history list UI
@@ -264,52 +262,267 @@ document.addEventListener('DOMContentLoaded', function() {
         updateChatHistoryList();
     }
     
-    // Function to save the current message to the chat history
+    // Function to save the current message to the chat history (database only)
     function saveMessageToChatHistory(text, sender) {
-        if (!currentChatId) {
-            // If no current chat, create one
-            currentChatId = 'chat_' + Date.now();
-            
-            // Set the current chat ID in localStorage
-            localStorage.setItem('currentChatId', currentChatId);
-            
-            // Update chat history in localStorage
-            const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-            const newChat = {
-                id: currentChatId,
-                title: text.substring(0, 30) + (text.length > 30 ? '...' : ''),
-                lastMessage: text,
-                timestamp: new Date().toISOString()
-            };
-            
-            chatHistory.unshift(newChat);
-            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-        } else {
-            // Update the last message in chat history
-            const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-            const chatIndex = chatHistory.findIndex(chat => chat.id === currentChatId);
-            if (chatIndex !== -1) {
-                chatHistory[chatIndex].lastMessage = text;
-                chatHistory[chatIndex].timestamp = new Date().toISOString();
-                // If it's the first message in a new chat, set the title to the first message
-                if (!chatHistory[chatIndex].title || chatHistory[chatIndex].title === 'New Chat') {
-                    chatHistory[chatIndex].title = text.substring(0, 30) + (text.length > 30 ? '...' : '');
+        // Save to database via API call
+        const userEmail = localStorage.getItem('userEmail');
+        if (!userEmail) {
+            console.error('No user email available to save chat history');
+            return;
+        }
+        
+        // The chat history is now saved server-side in the /chat endpoint,
+        // so this function is kept for compatibility but doesn't save to localStorage
+    }
+    
+    // Function to load chat history for current user from database
+    async function loadUserChatHistory() {
+        const userEmail = localStorage.getItem('userEmail');
+        if (!userEmail) {
+            console.error('No user email available to load chat history');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/chat-history?user_email=${encodeURIComponent(userEmail)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}` // Include auth token
                 }
-                localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Store the chat history in localStorage under the user's key
+                const userChatHistoryKey = `chat_history_${userEmail}`;
+                localStorage.setItem(userChatHistoryKey, JSON.stringify(data.chats));
+                
+                // Update the UI with chat history
+                updateChatHistoryList();
+            }
+        } catch (error) {
+            console.error('Error loading chat history:', error);
+        }
+    }
+    
+    // Function to load a specific chat for the user
+    async function loadChat(chatId) {
+        currentChatId = chatId;
+        localStorage.setItem('currentChatId', chatId);
+        
+        // Clear current chat display
+        clearChat();
+        
+        // Get user email to identify the user
+        const userEmail = localStorage.getItem('userEmail');
+        if (!userEmail) {
+            console.error('No user email available');
+            return;
+        }
+        
+        // Load chat messages from stored history
+        const userChatHistoryKey = `chat_history_${userEmail}`;
+        const userChats = JSON.parse(localStorage.getItem(userChatHistoryKey) || '[]');
+        const chat = userChats.find(c => c.id === chatId);
+        
+        if (chat && chat.messages && chat.messages.length > 0) {
+            // Hide welcome message
+            if (welcomeMessage) {
+                welcomeMessage.style.display = 'none';
+            }
+            
+            // Add messages to the chat container
+            chat.messages.forEach(msg => {
+                // Use the original addMessage logic to avoid saving to history again
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', msg.sender);
+                messageDiv.textContent = msg.text;
+                messagesContainer.appendChild(messageDiv);
+                
+                // Add visual effect for new messages
+                messageDiv.style.animation = 'none';
+                setTimeout(() => {
+                    messageDiv.style.animation = 'slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                }, 10);
+            });
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        } else {
+            // Show welcome message if no messages in the chat
+            if (welcomeMessage) {
+                welcomeMessage.style.display = 'flex';
             }
         }
         
-        // Save the individual message to the specific chat
-        const chatMessages = JSON.parse(localStorage.getItem(`chat_${currentChatId}`) || '[]');
-        chatMessages.push({
-            text: text,
-            sender: sender,
-            timestamp: new Date().toISOString()
-        });
-        localStorage.setItem(`chat_${currentChatId}`, JSON.stringify(chatMessages));
+        // Update active chat in the history list
+        updateChatHistoryList();
+    }
+    
+    // Function to create a new chat for the user
+    function createNewChat() {
+        // Clear current chat
+        clearChat();
         
+        // Generate a new chat ID
+        currentChatId = 'chat_' + Date.now();
+        localStorage.setItem('currentChatId', currentChatId);
+        
+        // Update chat history in localStorage for this user
+        const userEmail = localStorage.getItem('userEmail');
+        if (!userEmail) {
+            console.error('No user email available');
+            return;
+        }
+        
+        const userChatHistoryKey = `chat_history_${userEmail}`;
+        const chatHistory = JSON.parse(localStorage.getItem(userChatHistoryKey) || '[]');
+        const newChat = {
+            id: currentChatId,
+            title: 'New Chat',
+            lastMessage: 'New chat started',
+            timestamp: new Date().toISOString(),
+            messages: []
+        };
+
+        chatHistory.unshift(newChat); // Add to the beginning of the array
+        localStorage.setItem(userChatHistoryKey, JSON.stringify(chatHistory));
+
         // Update the chat history list
         updateChatHistoryList();
+
+        // Show welcome message
+        if (welcomeMessage) {
+            welcomeMessage.style.display = 'flex';
+        }
+    }
+    
+    // Function to update the chat history list UI for the current user
+    function updateChatHistoryList() {
+        const userEmail = localStorage.getItem('userEmail');
+        if (!userEmail) {
+            console.error('No user email available');
+            return;
+        }
+        
+        const userChatHistoryKey = `chat_history_${userEmail}`;
+        const chatHistory = JSON.parse(localStorage.getItem(userChatHistoryKey) || '[]');
+        
+        if (chatHistoryList) {
+            chatHistoryList.innerHTML = '';
+            
+            chatHistory.forEach(chat => {
+                const chatItem = document.createElement('div');
+                chatItem.classList.add('chat-history-item');
+                if (chat.id === currentChatId) {
+                    chatItem.classList.add('active');
+                }
+                
+                // Get the first 30 characters of the last message as the title
+                const lastMessage = chat.messages && chat.messages.length > 0 
+                    ? chat.messages[chat.messages.length - 1].text 
+                    : (chat.lastMessage || 'New chat');
+                    
+                // Check if the chat has a title, otherwise use the first part of the last message
+                let title = 'New Chat'; // default fallback
+                if (chat.title) {
+                    title = chat.title;
+                } else if (lastMessage && lastMessage.length > 0) {
+                    title = lastMessage.substring(0, 30) + (lastMessage.length > 30 ? '...' : '');
+                }
+                
+                chatItem.innerHTML = `
+                    <div class="chat-history-text">${title}</div>
+                    <div class="chat-history-actions">
+                        <button class="chat-history-delete" data-chat-id="${chat.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                // Add click event to load the chat
+                chatItem.addEventListener('click', function(e) {
+                    // If the delete button was clicked, don't load the chat
+                    if (e.target.closest('.chat-history-delete')) return;
+                    
+                    currentChatId = chat.id;  // Update current chat ID
+                    localStorage.setItem('currentChatId', currentChatId);  // Save to localStorage
+                    loadChat(chat.id);
+                });
+                
+                // Add click event to delete the chat
+                const deleteBtn = chatItem.querySelector('.chat-history-delete');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', function(e) {
+                        e.stopPropagation(); // Prevent loading the chat when deleting
+                        deleteChat(chat.id);
+                    });
+                }
+                
+                chatHistoryList.appendChild(chatItem);
+            });
+        }
+    }
+
+    // Function to delete a chat for the current user
+    async function deleteChat(chatId) {
+        showDeleteChatConfirmation(chatId);
+    }
+
+    // Function to perform the actual chat deletion
+    async function performDeleteChat(chatId) {
+        const userEmail = localStorage.getItem('userEmail');
+        if (!userEmail) {
+            console.error('No user email available');
+            return;
+        }
+        
+        try {
+            // Call the backend API to delete the chat
+            const response = await fetch(`/chat-history/${chatId}?user_email=${encodeURIComponent(userEmail)}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}` // Include auth token
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Remove chat from local storage
+                const userChatHistoryKey = `chat_history_${userEmail}`;
+                let chatHistory = JSON.parse(localStorage.getItem(userChatHistoryKey) || '[]');
+                chatHistory = chatHistory.filter(chat => chat.id !== chatId);
+                localStorage.setItem(userChatHistoryKey, JSON.stringify(chatHistory));
+                
+                // If we're deleting the current chat, clear the chat display
+                if (currentChatId === chatId) {
+                    currentChatId = null;
+                    localStorage.removeItem('currentChatId');
+                    clearChat();
+                }
+                
+                // Update the chat history list
+                updateChatHistoryList();
+            } else {
+                console.error('Failed to delete chat from server:', data.message);
+                showNotification(data.message || 'Failed to delete chat', 'error');
+            }
+        } catch (error) {
+            console.error('Error deleting chat:', error);
+            showNotification('Error deleting chat. Please try again.', 'error');
+        }
     }
     
     // Delete chat modal elements
@@ -366,30 +579,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Function to delete a chat
-    function deleteChat(chatId) {
-        showDeleteChatConfirmation(chatId);
-    }
-
-    // Function to perform the actual chat deletion
-    function performDeleteChat(chatId) {
-        // Remove chat from history
-        let chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-        chatHistory = chatHistory.filter(chat => chat.id !== chatId);
-        localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-        
-        // Remove chat messages from localStorage
-        localStorage.removeItem(`chat_${chatId}`);
-        
-        // If we're deleting the current chat, clear the chat display
-        if (currentChatId === chatId) {
-            currentChatId = null;
-            localStorage.removeItem('currentChatId');
-            clearChat();
-        }
-        
-        // Update the chat history list
-        updateChatHistoryList();
+    // Function to show delete chat confirmation modal
+    function showDeleteChatConfirmation(chatId) {
+        chatIdToDelete = chatId;
+        deleteChatModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
     }
     
     // Override the addMessage function to save messages to history
@@ -423,7 +617,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Make functions available globally so they can be used by other scripts
     window.addMessage = addMessage;
     window.loadChatHistory = loadChatHistory;
+    window.loadUserChatHistory = loadUserChatHistory;  // Make this available globally too
     window.createNewChat = createNewChat;
+    window.loadChat = loadChat;  // Make this available globally too
     
     // Function to handle window resize and orientation change
     function handleResize() {
@@ -465,28 +661,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const message = messageInput.value.trim();
         
         if (message) {
-            // If no current chat exists, create a new one before adding the message
-            if (!currentChatId) {
-                // Create a new chat with the first message
-                currentChatId = 'chat_' + Date.now();
-                localStorage.setItem('currentChatId', currentChatId);
-                
-                // Update chat history in localStorage
-                const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-                const newChat = {
-                    id: currentChatId,
-                    title: message.substring(0, 30) + (message.length > 30 ? '...' : ''),
-                    lastMessage: message,
-                    timestamp: new Date().toISOString()
-                };
-                
-                chatHistory.unshift(newChat); // Add to the beginning of the array
-                localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-                
-                // Update the chat history list
-                updateChatHistoryList();
-            }
-            
             // Add user message to chat
             addMessage(message, 'user');
             
@@ -504,6 +678,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Hide typing indicator and add bot response
                 hideTypingIndicator();
                 addMessage(botResponse, 'bot');
+                
+                // After getting response, reload the chat history to update it with the new conversation
+                setTimeout(() => {
+                    loadUserChatHistory();
+                }, 500); // Small delay to ensure the backend has time to save the chat
             } catch (error) {
                 console.error('Error getting bot response:', error);
                 hideTypingIndicator();
@@ -592,6 +771,56 @@ document.addEventListener('DOMContentLoaded', function() {
         addMessage(botResponse, 'bot');
     }
 
+    // Function to show notification (similar to the one in auth.js)
+    function showNotification(message, type, action = null) {
+        // Remove any existing notifications
+        const existingNotification = document.querySelector('.notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+        
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        // Add message and optional action button
+        if (action) {
+            notification.innerHTML = `
+                <div class="notification-content">${message}</div>
+                <button class="notification-action-btn" onclick="${action.fn}()" style="
+                    background: rgba(255,255,255,0.2); 
+                    border: 1px solid rgba(255,255,255,0.3); 
+                    color: white; 
+                    border-radius: 4px; 
+                    padding: 4px 8px; 
+                    margin-left: 10px; 
+                    cursor: pointer; 
+                    font-size: 0.85em;
+                ">${action.text}</button>
+            `;
+        } else {
+            notification.textContent = message;
+        }
+        
+        // Add to body
+        document.body.appendChild(notification);
+        
+        // Trigger the show animation
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 300);
+        }, 5000);
+    }
+
     // Function to send message to backend
     async function sendToBackend(message) {
         try {
@@ -604,7 +833,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({
                     message: message,
-                    userId: localStorage.getItem('userEmail')
+                    userId: localStorage.getItem('userEmail')  // Use email to identify user
                 })
             });
             
