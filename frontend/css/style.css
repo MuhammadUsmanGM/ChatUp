@@ -2848,6 +2848,91 @@ body {
     color: #333;
 }
 
+/* Required field indicators for password containers - use CSS positioning */
+.password-input-container.required .required-indicator {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    border-radius: 12px;
+    padding: 3px 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    z-index: 2;
+    box-shadow: 0 2px 5px rgba(255, 107, 107, 0.3);
+    animation: pulse 2s infinite;
+    height: auto;
+    min-height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+/* Ensure password input container has proper dimensions for indicator centering */
+.password-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;  /* This centers contents vertically */
+}
+
+/* For input group required indicators, JavaScript will handle precise positioning */
+.input-group.required .required-indicator {
+    position: absolute;
+    right: 10px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    border-radius: 12px;
+    padding: 3px 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    z-index: 2;
+    box-shadow: 0 2px 5px rgba(255, 107, 107, 0.3);
+    animation: pulse 2s infinite;
+    height: auto;
+    min-height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+/* Ensure proper positioning context */
+.input-group,
+.password-input-container {
+    position: relative;
+}
+
+/* Make sure inputs have consistent height for proper indicator centering */
+.input-group input,
+.password-input-container input {
+    height: calc(2.5em + 8px); /* Standard height to ensure consistent centering */
+}
+
+.input-group.required input,
+.input-group.required .password-input-container input {
+    border-color: #ff6b6b !important;
+    box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.3) !important;
+}
+
+
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 107, 107, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 107, 107, 0);
+    }
+}
+
+
+
 /* Theme Toggle Button - Perfectly round with glass effect */
 #theme-toggle {
     background: rgba(255, 255, 255, 0.15);

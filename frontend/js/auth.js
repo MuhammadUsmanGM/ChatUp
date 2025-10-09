@@ -22,6 +22,9 @@ document.addEventListener('DOMContentLoaded', function() {
         signupToggle.classList.remove('active');
         document.getElementById('login-form').style.display = 'block';
         document.getElementById('signup-form').style.display = 'none';
+        
+        // Set up validation for the login form when it's shown
+        setupFieldValidation();
     });
 
     signupToggle.addEventListener('click', function() {
@@ -33,6 +36,9 @@ document.addEventListener('DOMContentLoaded', function() {
         loginToggle.classList.remove('active');
         document.getElementById('signup-form').style.display = 'block';
         document.getElementById('login-form').style.display = 'none';
+        
+        // Set up validation for the signup form when it's shown
+        setupFieldValidation();
     });
 
     // Login Form Submission
@@ -44,8 +50,24 @@ document.addEventListener('DOMContentLoaded', function() {
             const password = document.getElementById('login-password').value;
             
             // Basic validation
-            if (!email || !password) {
-                showNotification('Please fill in all fields', 'error');
+            let hasError = false;
+            
+            // Clear previous error indicators
+            clearFieldErrors(['#login-email', '#login-password']);
+            
+            // Check each field and add error indicator if empty
+            if (!email) {
+                addFieldError('#login-email', 'Required');
+                hasError = true;
+            }
+            
+            if (!password) {
+                addFieldError('#login-password', 'Required');
+                hasError = true;
+            }
+            
+            if (hasError) {
+                showNotification('Please fill in all required fields', 'error');
                 return;
             }
             
@@ -54,6 +76,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const originalText = submitBtn.textContent;
             submitBtn.textContent = 'Logging in...';
             submitBtn.disabled = true;
+            
+
             
             try {
                 // When backend is ready, use actual API call:
@@ -114,8 +138,34 @@ document.addEventListener('DOMContentLoaded', function() {
             const confirmPassword = document.getElementById('signup-confirm-password').value;
             
             // Basic validation
-            if (!name || !email || !password || !confirmPassword) {
-                showNotification('Please fill in all fields', 'error');
+            let hasError = false;
+            
+            // Clear previous error indicators
+            clearFieldErrors(['#signup-name', '#signup-email', '#signup-password', '#signup-confirm-password']);
+            
+            // Check each field and add error indicator if empty
+            if (!name) {
+                addFieldError('#signup-name', 'Required');
+                hasError = true;
+            }
+            
+            if (!email) {
+                addFieldError('#signup-email', 'Required');
+                hasError = true;
+            }
+            
+            if (!password) {
+                addFieldError('#signup-password', 'Required');
+                hasError = true;
+            }
+            
+            if (!confirmPassword) {
+                addFieldError('#signup-confirm-password', 'Required');
+                hasError = true;
+            }
+            
+            if (hasError) {
+                showNotification('Please fill in all required fields', 'error');
                 return;
             }
             
@@ -134,6 +184,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const originalText = submitBtn.textContent;
             submitBtn.textContent = 'Creating account...';
             submitBtn.disabled = true;
+            
+
             
             try {
                 // When backend is ready, use actual API call:
@@ -269,6 +321,119 @@ document.addEventListener('DOMContentLoaded', function() {
         
         return `${maskedPart}@${domain}`;
     }
+    
+    // Function to add error indicator to a field
+    function addFieldError(fieldSelector, message) {
+        const field = document.querySelector(fieldSelector);
+        if (!field) return;
+        
+        const inputGroup = field.closest('.input-group');
+        if (!inputGroup) return;
+        
+        // Add required class to input group
+        inputGroup.classList.add('required');
+        
+        // Apply red border styling to the input
+        field.style.borderColor = '#ff6b6b';
+        field.style.boxShadow = '0 0 0 2px rgba(255, 107, 107, 0.3)';
+        
+        // For password inputs that are inside a password-input-container
+        const passwordContainer = field.closest('.password-input-container');
+        if (passwordContainer) {
+            // Handle password container separately - use pure CSS positioning
+            // Check if indicator already exists in the password container
+            let indicator = passwordContainer.querySelector('.required-indicator');
+            if (!indicator) {
+                // Create the indicator element
+                indicator = document.createElement('span');
+                indicator.className = 'required-indicator';
+                indicator.textContent = message;
+                
+                // Add to password container with default CSS positioning
+                passwordContainer.style.position = 'relative';
+                passwordContainer.appendChild(indicator);
+            } else {
+                indicator.textContent = message;
+            }
+            return; // Exit early for password containers
+        }
+        
+        // For regular inputs, continue with the JavaScript positioning approach
+        // Check if indicator already exists in the input group
+        let indicator = inputGroup.querySelector('.required-indicator');
+        if (!indicator) {
+            // Create the indicator element
+            indicator = document.createElement('span');
+            indicator.className = 'required-indicator';
+            indicator.textContent = message;
+            
+            // Add to the input group and use JavaScript for precise positioning
+            inputGroup.style.position = 'relative';
+            inputGroup.appendChild(indicator);
+            
+            // Calculate and set the correct top position for the indicator
+            // Wait for the element to be added to DOM before calculating position
+            setTimeout(() => {
+                // Calculate the vertical center of the input field within the group
+                const inputRect = field.getBoundingClientRect();
+                const groupRect = inputGroup.getBoundingClientRect();
+                
+                // Calculate how far down the input is positioned in the group
+                const inputTopOffset = inputRect.top - groupRect.top;
+                const inputHeight = inputRect.height;
+                
+                // Set the indicator to be centered vertically on the input field
+                const indicatorTop = inputTopOffset + (inputHeight / 2) - (indicator.offsetHeight / 2);
+                indicator.style.top = `${indicatorTop}px`;
+                indicator.style.transform = 'none';  // Override any CSS transform
+            }, 10);
+        } else {
+            indicator.textContent = message;
+            
+            // For existing indicators, recalculate position
+            setTimeout(() => {
+                const inputRect = field.getBoundingClientRect();
+                const groupRect = inputGroup.getBoundingClientRect();
+                
+                // Calculate how far down the input is positioned in the group
+                const inputTopOffset = inputRect.top - groupRect.top;
+                const inputHeight = inputRect.height;
+                
+                // Set the indicator to be centered vertically on the input field
+                const indicatorTop = inputTopOffset + (inputHeight / 2) - (indicator.offsetHeight / 2);
+                indicator.style.top = `${indicatorTop}px`;
+                indicator.style.transform = 'none';  // Override any CSS transform
+            }, 10);
+        }
+    }
+    
+    // Function to clear error indicators from specified fields
+    function clearFieldErrors(selectors) {
+        selectors.forEach(selector => {
+            const field = document.querySelector(selector);
+            if (!field) return;
+            
+            const inputGroup = field.closest('.input-group');
+            if (!inputGroup) return;
+            
+            // Remove required class
+            inputGroup.classList.remove('required');
+            
+            // Remove indicator if exists
+            const indicator = inputGroup.querySelector('.required-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+            
+            // Reset field styling
+            field.style.borderColor = '';
+            field.style.boxShadow = '';
+        });
+    }
+    
+
+    
+
     
     // Show profile modal
     if (profileBtn) {
@@ -573,8 +738,29 @@ document.addEventListener('DOMContentLoaded', function() {
             const confirmNewPassword = document.getElementById('confirm-new-password').value;
             
             // Validation
-            if (!oldPassword || !newPassword || !confirmNewPassword) {
-                showNotification('Please fill in all fields', 'error');
+            let hasError = false;
+            
+            // Clear previous error indicators
+            clearFieldErrors(['#old-password', '#new-password', '#confirm-new-password']);
+            
+            // Check each field and add error indicator if empty
+            if (!oldPassword) {
+                addFieldError('#old-password', 'Required');
+                hasError = true;
+            }
+            
+            if (!newPassword) {
+                addFieldError('#new-password', 'Required');
+                hasError = true;
+            }
+            
+            if (!confirmNewPassword) {
+                addFieldError('#confirm-new-password', 'Required');
+                hasError = true;
+            }
+            
+            if (hasError) {
+                showNotification('Please fill in all required fields', 'error');
                 return;
             }
             
@@ -593,6 +779,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const originalText = submitBtn.textContent;
             submitBtn.textContent = 'Updating...';
             submitBtn.disabled = true;
+            
+
             
             try {
                 // Get the user's email from localStorage
@@ -925,6 +1113,63 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize app
     initializeApp();
 
+    // Set up event listeners for all required fields to clear error styling when user types
+    function setupFieldValidation() {
+        // Function to add input event listener to clear error styling
+        function addInputListener(formId) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+            
+            const requiredFields = form.querySelectorAll('input[required]');
+            requiredFields.forEach(input => {
+                // Remove any existing listeners to avoid duplicates
+                input.removeEventListener('input', input._errorClearHandler);
+                
+                // Define the event handler
+                const handler = function() {
+                    // Check if field has value
+                    if (this.value.trim()) {
+                        // Reset the styling
+                        this.style.borderColor = '';
+                        this.style.boxShadow = '';
+                        
+                        // Remove the required class from the input group
+                        const inputGroup = this.closest('.input-group');
+                        const passwordContainer = this.closest('.password-input-container');
+                        
+                        if (inputGroup) {
+                            inputGroup.classList.remove('required');
+                            const indicator = inputGroup.querySelector('.required-indicator');
+                            if (indicator) {
+                                indicator.remove();
+                            }
+                        }
+                        
+                        // Also check password container for password fields
+                        if (passwordContainer) {
+                            passwordContainer.classList.remove('required');
+                            const indicator = passwordContainer.querySelector('.required-indicator');
+                            if (indicator) {
+                                indicator.remove();
+                            }
+                        }
+                    }
+                };
+                
+                // Store handler reference to allow removal later
+                input._errorClearHandler = handler;
+                
+                // Add the event listener
+                input.addEventListener('input', handler);
+            });
+        }
+        
+        // Initialize listeners for login and signup forms
+        addInputListener('loginForm');
+        addInputListener('signupForm');
+        addInputListener('change-password-form');
+    }
+    
     // Initialize the application
     function initializeApp() {
         if (localStorage.getItem('isLoggedIn') === 'true') {
@@ -957,6 +1202,9 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 authContainer.style.display = 'flex';
                 chatContainer.style.display = 'none';
+                
+                // Set up validation event listeners
+                setupFieldValidation();
             }
         }
     }

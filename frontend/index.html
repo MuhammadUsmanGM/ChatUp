@@ -32,7 +32,7 @@
                 
                 <div id="login-form" class="form-content">
                     <h2>Login to Your Account</h2>
-                    <form id="loginForm">
+                    <form id="loginForm" novalidate>
                         <div class="input-group">
                             <label for="login-email">Email</label>
                             <input type="email" id="login-email" name="email" required>
@@ -52,7 +52,7 @@
                 
                 <div id="signup-form" class="form-content" style="display: none;">
                     <h2>Create New Account</h2>
-                    <form id="signupForm">
+                    <form id="signupForm" novalidate>
                         <div class="input-group">
                             <label for="signup-name">Full Name</label>
                             <input type="text" id="signup-name" name="name" required>
@@ -215,7 +215,7 @@
                 <button id="close-password" class="close-btn">&times;</button>
             </div>
             <div class="password-content">
-                <form id="change-password-form">
+                <form id="change-password-form" novalidate>
                     <div class="input-group">
                         <label for="old-password"><i class="fas fa-lock"></i> Current Password</label>
                         <div class="password-input-container">
