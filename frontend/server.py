@@ -8,6 +8,10 @@ from flask_cors import CORS
 import subprocess
 import sys
 
+# Load environment variables from .env file
+from dotenv import load_dotenv
+load_dotenv()
+
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend communication
 
@@ -569,7 +573,6 @@ def send_verification_email(email, name, token):
     
     try:
         # Create the verification link - using configurable base URL for production
-        import os
         base_url = os.getenv('BASE_URL', 'http://localhost:5000')  # Set this to your production URL
         verification_link = f"{base_url}/verify-email/{token}"
         
