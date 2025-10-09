@@ -2847,3 +2847,145 @@ body {
     font-size: 1.4rem;
     color: #333;
 }
+
+/* Theme Toggle Button - Perfectly round with glass effect */
+#theme-toggle {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: #333;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    max-width: 44px;
+    max-height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1rem;
+    z-index: 1000;
+    margin: 0;
+    padding: 0;
+    box-shadow: 
+      0 8px 32px 0 rgba(31, 38, 135, 0.2),
+      inset 0 4px 10px rgba(255, 255, 255, 0.2);
+    outline: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+#theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.1);
+    box-shadow: 
+      0 8px 32px 0 rgba(31, 38, 135, 0.25),
+      inset 0 4px 15px rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="dark"] #theme-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #e0e0e0;
+    box-shadow: 
+      0 8px 32px 0 rgba(0, 0, 0, 0.3),
+      inset 0 4px 10px rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] #theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      0 8px 32px 0 rgba(0, 0, 0, 0.4),
+      inset 0 4px 15px rgba(255, 255, 255, 0.15);
+}
+
+/* Theme Toggle Button in Chat User Info */
+.user-info #theme-toggle {
+    position: static;
+    margin-right: 1rem;
+    top: auto;
+    right: auto;
+}
+
+/* Theme Variables */
+:root {
+    --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --bg-secondary: linear-gradient(135deg, #f0f4f8 0%, #e6e9f0 100%);
+    --bg-container: rgba(255, 255, 255, 0.95);
+    --bg-sidebar: rgba(255, 255, 255, 0.95);
+    --bg-input: #f9f9f9;
+    --bg-input-focus: white;
+    --text-primary: #333;
+    --text-secondary: #666;
+    --text-light: #888;
+    --border-color: #e0e0e0;
+    --border-light: rgba(0, 0, 0, 0.05);
+    --accent-primary: #667eea;
+    --accent-secondary: #764ba2;
+    --accent-gradient: linear-gradient(135deg, #667eea, #764ba2);
+    --shadow-light: 0 4px 10px rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 5px 15px rgba(0, 0, 0, 0.1);
+    --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.15);
+    --danger: #ff6b6b;
+    --success: #4CAF50;
+    --info: #2196F3;
+}
+
+/* Dark theme variables */
+[data-theme="dark"] {
+    --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    --bg-secondary: linear-gradient(135deg, #0f2027 0%, #1a2a3a 100%);
+    --bg-container: rgba(25, 25, 35, 0.95);
+    --bg-sidebar: rgba(25, 25, 35, 0.95);
+    --bg-input: rgba(45, 45, 60, 0.8);
+    --bg-input-focus: rgba(55, 55, 70, 0.9);
+    --text-primary: #f0f0f0;
+    --text-secondary: #c0c0c0;
+    --text-light: #a0a0a0;
+    --border-color: #4a4d6a;
+    --border-light: rgba(255, 255, 255, 0.08);
+    --accent-primary: #6a8eff;
+    --accent-secondary: #7d9cff;
+    --accent-gradient: linear-gradient(135deg, #6a8eff, #7d9cff, #8a9bff);
+    --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.5);
+    --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.6);
+    --danger: #ff6b6b;
+    --success: #50fa7b;
+    --info: #79d3ff;
+}
+
+/* Apply smooth transitions */
+* {
+    transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+}
+  
+/* Apply theme to main elements */
+body {
+    background: var(--bg-primary);
+}
+  
+.auth-container {
+    background: rgba(255, 255, 255, 0.05);
+}
+  
+.form-container {
+    background: var(--bg-container);
+}
+  
+.chat-container {
+    background: var(--bg-secondary);
+}
+  
+.sidebar {
+    background: var(--bg-sidebar);
+}
+  
+.chat-header {
+    background: var(--bg-container);
+}
