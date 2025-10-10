@@ -327,8 +327,471 @@ finally:
         return "I'm having trouble connecting to the chat agent. Please try again later."
 
 
-# Email verification endpoint
+# Email verification endpoint - serves the HTML page
 @app.route('/verify-email/<token>', methods=['GET'])
+def verify_email_page(token):
+    try:
+        # Find user with the provided verification token
+        user = user_collection.find_one({'verification_token': token})
+        
+        if not user:
+            # Return the verification page with an error message
+            return '''
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Email Verification Failed - ChatUp</title>
+                <style>
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    }
+
+                    body {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        min-height: 100vh;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 20px;
+                    }
+
+                    .container {
+                        background: white;
+                        border-radius: 16px;
+                        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+                        padding: 60px 40px;
+                        text-align: center;
+                        max-width: 500px;
+                        width: 100%;
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .container::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        height: 8px;
+                        background: linear-gradient(90deg, #f44336, #d32f2f);
+                    }
+
+                    .icon {
+                        width: 80px;
+                        height: 80px;
+                        background: linear-gradient(135deg, #f44336, #d32f2f);
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin: 0 auto 20px;
+                    }
+
+                    .icon svg {
+                        width: 50px;
+                        height: 50px;
+                        fill: white;
+                    }
+
+                    h1 {
+                        color: #333;
+                        font-size: 2.5rem;
+                        margin-bottom: 15px;
+                        font-weight: 600;
+                    }
+
+                    .error-message {
+                        color: #f44336;
+                        font-size: 1.2rem;
+                        margin-bottom: 30px;
+                        font-weight: 500;
+                    }
+
+                    .description {
+                        color: #666;
+                        font-size: 1rem;
+                        margin-bottom: 30px;
+                        line-height: 1.6;
+                    }
+
+                    .btn {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        border: none;
+                        padding: 15px 30px;
+                        font-size: 1rem;
+                        border-radius: 50px;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        text-decoration: none;
+                        display: inline-block;
+                        font-weight: 500;
+                        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                    }
+
+                    .btn:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+                    }
+
+                    .btn:active {
+                        transform: translateY(0);
+                    }
+
+                    @media (max-width: 600px) {
+                        .container {
+                            padding: 40px 20px;
+                        }
+                        
+                        h1 {
+                            font-size: 2rem;
+                        }
+                        
+                        .error-message {
+                            font-size: 1.1rem;
+                        }
+                        
+                        .btn {
+                            padding: 12px 25px;
+                            font-size: 0.9rem;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                    </div>
+                    <h1>Verification Failed</h1>
+                    <p class="error-message">Invalid or expired verification token.</p>
+                    <p class="description">The verification link you clicked is invalid or has expired. Please try registering again or contact support if you continue to have issues.</p>
+                    <a href="/" class="btn">Back to Login</a>
+                </div>
+            </body>
+            </html>
+            '''
+        
+        # Update user to mark email as verified
+        user_collection.update_one(
+            {'_id': user['_id']},
+            {
+                '$set': {
+                    'email_verified': True,
+                    'verification_token': None  # Remove the token after verification
+                }
+            }
+        )
+        
+        # Return the verification success page
+        return '''
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Email Verified - ChatUp</title>
+            <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                }
+
+                body {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 20px;
+                }
+
+                .container {
+                    background: white;
+                    border-radius: 16px;
+                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+                    padding: 60px 40px;
+                    text-align: center;
+                    max-width: 500px;
+                    width: 100%;
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .container::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 8px;
+                    background: linear-gradient(90deg, #4CAF50, #45a049);
+                }
+
+                .icon {
+                    width: 80px;
+                    height: 80px;
+                    background: linear-gradient(135deg, #4CAF50, #45a049);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 20px;
+                    animation: pulse 2s infinite;
+                }
+
+                .icon svg {
+                    width: 50px;
+                    height: 50px;
+                    fill: white;
+                }
+
+                h1 {
+                    color: #333;
+                    font-size: 2.5rem;
+                    margin-bottom: 15px;
+                    font-weight: 600;
+                }
+
+                .success-message {
+                    color: #4CAF50;
+                    font-size: 1.2rem;
+                    margin-bottom: 15px;
+                    font-weight: 500;
+                }
+
+                .description {
+                    color: #666;
+                    font-size: 1rem;
+                    margin-bottom: 30px;
+                    line-height: 1.6;
+                }
+
+                .btn {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    padding: 15px 30px;
+                    font-size: 1rem;
+                    border-radius: 50px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    text-decoration: none;
+                    display: inline-block;
+                    font-weight: 500;
+                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                }
+
+                .btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+                }
+
+                .btn:active {
+                    transform: translateY(0);
+                }
+
+                @keyframes pulse {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                    100% { transform: scale(1); }
+                }
+
+                @media (max-width: 600px) {
+                    .container {
+                        padding: 40px 20px;
+                    }
+                    
+                    h1 {
+                        font-size: 2rem;
+                    }
+                    
+                    .success-message, .description {
+                        font-size: 1rem;
+                    }
+                    
+                    .btn {
+                        padding: 12px 25px;
+                        font-size: 0.9rem;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                </div>
+                <h1>Email Verified!</h1>
+                <p class="success-message">Success! Your email has been verified.</p>
+                <p class="description">You can now log in to your account and start using all the features of ChatUp.</p>
+                <a href="/" class="btn">Back to Login</a>
+            </div>
+        </body>
+        </html>
+        '''
+        
+    except Exception as e:
+        print(f"Email verification error: {e}")
+        return '''
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Verification Error - ChatUp</title>
+            <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                }
+
+                body {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 20px;
+                }
+
+                .container {
+                    background: white;
+                    border-radius: 16px;
+                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+                    padding: 60px 40px;
+                    text-align: center;
+                    max-width: 500px;
+                    width: 100%;
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .container::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 8px;
+                    background: linear-gradient(90deg, #f44336, #d32f2f);
+                }
+
+                .icon {
+                    width: 80px;
+                    height: 80px;
+                    background: linear-gradient(135deg, #f44336, #d32f2f);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 20px;
+                }
+
+                .icon svg {
+                    width: 50px;
+                    height: 50px;
+                    fill: white;
+                }
+
+                h1 {
+                    color: #333;
+                    font-size: 2.5rem;
+                    margin-bottom: 15px;
+                    font-weight: 600;
+                }
+
+                .error-message {
+                    color: #f44336;
+                    font-size: 1.2rem;
+                    margin-bottom: 30px;
+                    font-weight: 500;
+                }
+
+                .description {
+                    color: #666;
+                    font-size: 1rem;
+                    margin-bottom: 30px;
+                    line-height: 1.6;
+                }
+
+                .btn {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    padding: 15px 30px;
+                    font-size: 1rem;
+                    border-radius: 50px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    text-decoration: none;
+                    display: inline-block;
+                    font-weight: 500;
+                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                }
+
+                .btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+                }
+
+                .btn:active {
+                    transform: translateY(0);
+                }
+
+                @media (max-width: 600px) {
+                    .container {
+                        padding: 40px 20px;
+                    }
+                    
+                    h1 {
+                        font-size: 2rem;
+                    }
+                    
+                    .error-message {
+                        font-size: 1.1rem;
+                    }
+                    
+                    .btn {
+                        padding: 12px 25px;
+                        font-size: 0.9rem;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                </div>
+                <h1>Verification Error</h1>
+                <p class="error-message">An error occurred during email verification.</p>
+                <p class="description">Something went wrong while verifying your email. Please try again or contact support if the issue persists.</p>
+                <a href="/" class="btn">Back to Login</a>
+            </div>
+        </body>
+        </html>
+        '''
+
+
+# API endpoint for verifying email (for JavaScript requests)
+@app.route('/api/verify-email/<token>', methods=['GET'])
 def verify_email(token):
     try:
         # Find user with the provided verification token
