@@ -256,7 +256,7 @@ try:
     import os
     gemini_api_key = os.getenv("GEMINI_API_KEY")
     if not gemini_api_key:
-        print("ERROR: API key not found")
+        print("AGENT_ERROR: API key not found")
         sys.exit(1)
     
     external_client = AsyncOpenAI(
@@ -285,7 +285,7 @@ try:
     print(result.final_output, end='')  # Print result without extra newline
     
 except Exception as e:
-    print(f"ERROR: {{str(e)}}")
+    print(f"AGENT_ERROR: {{str(e)}}")
 finally:
     os.chdir(original_cwd)  # Restore original working directory
 '''
@@ -307,9 +307,9 @@ finally:
         os.unlink(temp_script_path)
         
         if result.returncode == 0:
-            # Return the response, stripping "ERROR:" if it's not actually an error
+            # Return the response, checking specifically for our AGENT_ERROR marker
             output = result.stdout.strip()
-            if output.startswith("ERROR:"):
+            if output.startswith("AGENT_ERROR:"):
                 print(f"Agent execution error: {output}")
                 return "I'm having trouble processing your request. Please try again later."
             return output
