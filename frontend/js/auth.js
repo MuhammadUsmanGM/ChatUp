@@ -1592,6 +1592,232 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('signup-form').style.display = 'none';
         });
     }
+    
+    // Password Reset Functionality
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    const passwordResetModal = document.getElementById('password-reset-modal');
+    const closeResetPassword = document.getElementById('close-reset-password');
+    const cancelResetPassword = document.getElementById('cancel-reset-password');
+    const passwordResetForm = document.getElementById('password-reset-form');
+    const passwordResetConfirmModal = document.getElementById('password-reset-confirm-modal');
+    const closeResetConfirm = document.getElementById('close-reset-confirm');
+    const backToLoginFromReset = document.getElementById('back-to-login-from-reset');
+    const resetEmailDisplay = document.getElementById('reset-email-display');
+    
+    // Show password reset modal
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            passwordResetModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        });
+    }
+    
+    // Close password reset modal
+    if (closeResetPassword) {
+        closeResetPassword.addEventListener('click', function() {
+            passwordResetModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        });
+    }
+    
+    if (cancelResetPassword) {
+        cancelResetPassword.addEventListener('click', function() {
+            passwordResetModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        });
+    }
+    
+    // Also close modal when clicking outside of it
+    if (passwordResetModal) {
+        passwordResetModal.addEventListener('click', function(e) {
+            if (e.target === passwordResetModal) {
+                passwordResetModal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Re-enable scrolling
+            }
+        });
+    }
+    
+    // Handle password reset form submission
+    if (passwordResetForm) {
+        passwordResetForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('reset-email').value;
+            
+            // Basic validation
+            if (!email) {
+                showNotification('Please enter your email address', 'error');
+                return;
+            }
+            
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showNotification('Please enter a valid email address', 'error');
+                return;
+            }
+            
+            // Disable form during submission
+            const submitBtn = passwordResetForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+            
+            try {
+                // Call the backend API to send password reset email
+                const response = await fetch('/request-password-reset', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Show confirmation modal
+                    resetEmailDisplay.textContent = maskEmail(email);
+                    passwordResetModal.style.display = 'none';
+                    passwordResetConfirmModal.style.display = 'flex';
+                    showNotification('Password reset link has been sent to your email!', 'success');
+                } else {
+                    showNotification(result.message || 'Failed to send password reset link. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error sending password reset:', error);
+                showNotification('An error occurred while sending password reset link. Please try again.', 'error');
+            } finally {
+                // Re-enable form
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    }
+    
+    // Close reset confirmation modal
+    if (closeResetConfirm) {
+        closeResetConfirm.addEventListener('click', function() {
+            passwordResetConfirmModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        });
+    }
+    
+    // Back to login from reset confirmation
+    if (backToLoginFromReset) {
+        backToLoginFromReset.addEventListener('click', function() {
+            passwordResetConfirmModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        });
+    }
+    
+    // Also close reset confirmation modal when clicking outside of it
+    if (passwordResetConfirmModal) {
+        passwordResetConfirmModal.addEventListener('click', function(e) {
+            if (e.target === passwordResetConfirmModal) {
+                passwordResetConfirmModal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Re-enable scrolling
+            }
+        });
+    }
+    
+    // Check if we're on the password reset page (when user clicks the reset link)
+    const urlParams = new URLSearchParams(window.location.search);
+    const resetToken = urlParams.get('token');
+    if (resetToken) {
+        // Show the password reset UI
+        document.getElementById('password-reset-ui').style.display = 'flex';
+        document.getElementById('auth-container').style.display = 'none';
+    }
+    
+    // Password Reset UI functionality
+    const resetPasswordForm = document.getElementById('reset-password-form');
+    const backToLoginFromResetUI = document.getElementById('back-to-login-from-reset-ui');
+    
+    // Handle password reset submission
+    if (resetPasswordForm) {
+        resetPasswordForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const newPassword = document.getElementById('new-password').value;
+            const confirmNewPassword = document.getElementById('confirm-new-password').value;
+            
+            // Validation
+            if (!newPassword || !confirmNewPassword) {
+                showNotification('Please fill in both password fields', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmNewPassword) {
+                showNotification('Passwords do not match', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showNotification('Password must be at least 6 characters long', 'error');
+                return;
+            }
+            
+            // Disable form during submission
+            const submitBtn = document.getElementById('save-new-password');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Resetting...';
+            submitBtn.disabled = true;
+            
+            try {
+                // Call the backend API to reset the password
+                const response = await fetch('/reset-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        token: resetToken,
+                        newPassword: newPassword
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showNotification('Password has been reset successfully!', 'success');
+                    // Redirect to login page after a short delay
+                    setTimeout(() => {
+                        // Hide reset UI and show auth container
+                        document.getElementById('password-reset-ui').style.display = 'none';
+                        document.getElementById('auth-container').style.display = 'flex';
+                        // Reset the form
+                        resetPasswordForm.reset();
+                    }, 2000);
+                } else {
+                    showNotification(result.message || 'Failed to reset password. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error resetting password:', error);
+                showNotification('An error occurred while resetting your password. Please try again.', 'error');
+            } finally {
+                // Re-enable form
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    }
+    
+    // Back to login from reset UI
+    if (backToLoginFromResetUI) {
+        backToLoginFromResetUI.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('password-reset-ui').style.display = 'none';
+            document.getElementById('auth-container').style.display = 'flex';
+        });
+    }
+    
+    // Password visibility toggle for reset UI
+    setupPasswordToggle('new-password', 'toggle-new-password-reset');
+    setupPasswordToggle('confirm-new-password', 'toggle-confirm-new-password-reset');
 
     // Auto-resize textarea
     if (messageInput) {

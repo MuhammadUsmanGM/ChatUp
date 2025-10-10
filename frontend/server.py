@@ -613,6 +613,66 @@ def send_verification_email(email, name, token):
         return False
 
 
+# Function to send password reset email
+def send_password_reset_email(email, name, token):
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+    
+    # Email configuration - you can use environment variables for these
+    smtp_server = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
+    smtp_port = int(os.getenv('SMTP_PORT', '587'))
+    sender_email = os.getenv('EMAIL_ADDRESS')
+    sender_password = os.getenv('EMAIL_PASSWORD')
+    
+    if not sender_email or not sender_password:
+        print("Email configuration missing. Please set EMAIL_ADDRESS and EMAIL_PASSWORD environment variables.")
+        return False
+    
+    try:
+        # Create the reset link - using configurable base URL for production
+        base_url = os.getenv('BASE_URL', 'http://localhost:5000')  # Set this to your production URL
+        reset_link = f"{base_url}/reset-password?token={token}"
+        
+        # Create the email
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = email
+        msg['Subject'] = "Password Reset Request - ChatUp"
+        
+        body = f"""
+        Hello {name},
+        
+        You have requested to reset your password for your ChatUp account. Please click the link below to reset your password:
+        
+        {reset_link}
+        
+        This link will expire in 2 hours for security reasons.
+        
+        If you did not request a password reset, please ignore this email or contact support if you believe this is unauthorized access.
+        
+        Best regards,
+        The ChatUp Team
+        """
+        
+        msg.attach(MIMEText(body, 'plain'))
+        
+        # Connect to server and send email
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        text = msg.as_string()
+        server.sendmail(sender_email, email, text)
+        server.quit()
+        
+        print(f"Password reset email sent to {email}")
+        return True
+        
+    except Exception as e:
+        print(f"Failed to send password reset email: {e}")
+        return False
+
+
 # Delete account endpoint
 @app.route('/delete-account', methods=['DELETE'])
 def delete_account():
@@ -670,6 +730,152 @@ def delete_account():
             'success': False,
             'message': 'An error occurred while deleting your account.'
         }), 500
+
+
+# Request password reset endpoint
+@app.route('/request-password-reset', methods=['POST'])
+def request_password_reset():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        
+        if not email:
+            return jsonify({
+                'success': False,
+                'message': 'Email is required'
+            }), 400
+        
+        # Find the user in the database
+        user = user_collection.find_one({'email': email})
+        if not user:
+            # Return success even if user doesn't exist to avoid email enumeration
+            return jsonify({
+                'success': True,
+                'message': 'If an account exists with this email, a password reset link has been sent.'
+            }), 200
+        
+        # Generate a password reset token
+        import secrets
+        reset_token = secrets.token_urlsafe(32)
+        reset_token_expires = datetime.now().timestamp() + (2 * 60 * 60)  # 2 hours from now
+        
+        # Update user with reset token and expiration
+        user_collection.update_one(
+            {'_id': user['_id']},
+            {
+                '$set': {
+                    'reset_password_token': reset_token,
+                    'reset_password_expires': reset_token_expires
+                }
+            }
+        )
+        
+        # Send password reset email
+        reset_sent = send_password_reset_email(email, user['name'], reset_token)
+        if not reset_sent:
+            print(f"Failed to send password reset email to {email}")
+            # Still return success to avoid email enumeration
+            return jsonify({
+                'success': True,
+                'message': 'If an account exists with this email, a password reset link has been sent.'
+            }), 200
+        else:
+            return jsonify({
+                'success': True,
+                'message': 'Password reset link has been sent to your email.'
+            }), 200
+        
+    except Exception as e:
+        print(f"Request password reset error: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while requesting password reset.'
+        }), 500
+
+
+# Reset password endpoint
+@app.route('/reset-password', methods=['POST'])
+def reset_password():
+    try:
+        data = request.get_json()
+        token = data.get('token')
+        new_password = data.get('newPassword')
+        
+        if not token or not new_password:
+            return jsonify({
+                'success': False,
+                'message': 'Token and new password are required'
+            }), 400
+        
+        if len(new_password) < 6:
+            return jsonify({
+                'success': False,
+                'message': 'Password must be at least 6 characters long'
+            }), 400
+        
+        # Find user with the provided reset token
+        user = user_collection.find_one({'reset_password_token': token})
+        if not user:
+            return jsonify({
+                'success': False,
+                'message': 'Invalid or expired reset token.'
+            }), 400
+        
+        # Check if the token has expired
+        reset_expires = user.get('reset_password_expires')
+        if reset_expires and datetime.now().timestamp() > reset_expires:
+            # Token has expired, remove it from the user document
+            user_collection.update_one(
+                {'_id': user['_id']},
+                {
+                    '$unset': {
+                        'reset_password_token': "",
+                        'reset_password_expires': ""
+                    }
+                }
+            )
+            return jsonify({
+                'success': False,
+                'message': 'Reset token has expired. Please request a new password reset link.'
+            }), 400
+        
+        # Hash the new password
+        hashed_new_password = generate_password_hash(new_password, method='pbkdf2:sha256', salt_length=10)
+        
+        # Update user's password and remove the reset token
+        user_collection.update_one(
+            {'_id': user['_id']},
+            {
+                '$set': {
+                    'password': hashed_new_password,
+                    'updatedAt': datetime.now()
+                },
+                '$unset': {
+                    'reset_password_token': "",
+                    'reset_password_expires': ""
+                }
+            }
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Password has been reset successfully!'
+        }), 200
+        
+    except Exception as e:
+        print(f"Reset password error: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while resetting your password.'
+        }), 500
+
+
+# Password reset page route
+@app.route('/reset-password')
+def reset_password_page():
+    # This route serves the password reset page with the token in the URL
+    # The frontend JavaScript will detect the token and show the reset UI
+    return send_from_directory('.', 'index.html')
 
 
 # Verify password for specific user

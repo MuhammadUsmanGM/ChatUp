@@ -3074,3 +3074,234 @@ body {
 .chat-header {
     background: var(--bg-container);
 }
+
+/* Password Reset Modal Styles */
+.password-reset-modal {
+    background: white;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    animation: modalAppear 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    position: relative;
+}
+
+.password-reset-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.password-reset-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.password-reset-content {
+    padding: 1.5rem;
+}
+
+.password-reset-content .input-group {
+    margin-bottom: 1.2rem;
+}
+
+.password-reset-content .input-group label {
+    display: block;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.password-reset-content .input-group label i {
+    margin-right: 0.5rem;
+    color: #667eea;
+}
+
+.password-reset-content .input-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f9f9f9;
+}
+
+.password-reset-content .input-group input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    background: white;
+}
+
+.password-reset-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.password-reset-actions .btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+}
+
+/* Tablet and smaller screens for password reset modal */
+@media (max-width: 768px) {
+    .password-reset-modal {
+        width: 95%;
+        margin: 1rem;
+    }
+    
+    .password-reset-header {
+        padding: 1.2rem;
+    }
+    
+    .password-reset-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .password-reset-content {
+        padding: 1.5rem;
+    }
+    
+    .password-reset-content .input-group {
+        margin-bottom: 1.2rem;
+    }
+    
+    .password-reset-content .input-group label {
+        font-size: 0.9rem;
+    }
+    
+    .password-reset-content .input-group input {
+        padding: 10px 12px;
+        font-size: 1rem;
+    }
+    
+    .password-reset-actions {
+        flex-direction: column;
+    }
+    
+    .password-reset-actions .btn {
+        width: 100%;
+        margin: 0;
+    }
+}
+
+/* Small mobile devices for password reset modal */
+@media (max-width: 480px) {
+    .password-reset-modal {
+        width: 98%;
+        margin: 0.5rem;
+    }
+    
+    .password-reset-header {
+        padding: 1rem;
+    }
+    
+    .password-reset-header h2 {
+        font-size: 1.2rem;
+    }
+    
+    .password-reset-content {
+        padding: 1rem;
+    }
+    
+    .password-reset-content .input-group {
+        margin-bottom: 1rem;
+    }
+    
+    .password-reset-content .input-group label {
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+    }
+    
+    .password-reset-content .input-group input {
+        padding: 9px 11px;
+        font-size: 0.95rem;
+    }
+    
+    .password-reset-actions {
+        padding: 0.8rem 0;
+    }
+}
+
+/* Password Reset UI specific styles */
+#password-reset-ui .form-container {
+    padding: 2rem 1.8rem;
+}
+
+#password-reset-ui .input-group {
+    margin-bottom: 1.2rem;
+}
+
+#password-reset-ui .input-group input {
+    padding: 12px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: #f9f9f9;
+}
+
+#password-reset-ui .input-group input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    background: white;
+}
+
+#password-reset-ui .btn.primary {
+    width: 100%;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+#password-reset-ui .btn.primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(102, 126, 234, 0.5);
+}
+
+#password-reset-ui a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+#password-reset-ui a:hover {
+    text-decoration: underline;
+}
+
+/* Forgot Password link styling */
+.forgot-password-link {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.forgot-password-link a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.forgot-password-link a:hover {
+    text-decoration: underline;
+}
