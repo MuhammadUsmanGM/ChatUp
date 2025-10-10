@@ -1685,7 +1685,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     passwordResetConfirmModal.style.display = 'flex';
                     showNotification('Password reset link has been sent to your email!', 'success');
                 } else {
-                    showNotification(result.message || 'Failed to send password reset link. Please try again.', 'error');
+                    // Check if the error is because the account doesn't exist
+                    if (result.message && result.message.includes('does not exist')) {
+                        showNotification('No account found with this email address. Please check the email and try again.', 'error');
+                    } else {
+                        showNotification(result.message || 'Failed to send password reset link. Please try again.', 'error');
+                    }
                 }
             } catch (error) {
                 console.error('Error sending password reset:', error);

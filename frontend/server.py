@@ -1211,11 +1211,10 @@ def request_password_reset():
         # Find the user in the database
         user = user_collection.find_one({'email': email})
         if not user:
-            # Return success even if user doesn't exist to avoid email enumeration
             return jsonify({
-                'success': True,
-                'message': 'If an account exists with this email, a password reset link has been sent.'
-            }), 200
+                'success': False,
+                'message': 'Account with this email does not exist'
+            }), 404
         
         # Generate a password reset token
         import secrets
@@ -1237,11 +1236,10 @@ def request_password_reset():
         reset_sent = send_password_reset_email(email, user['name'], reset_token)
         if not reset_sent:
             print(f"Failed to send password reset email to {email}")
-            # Still return success to avoid email enumeration
             return jsonify({
-                'success': True,
-                'message': 'If an account exists with this email, a password reset link has been sent.'
-            }), 200
+                'success': False,
+                'message': 'Failed to send password reset email. Please try again later.'
+            }), 500
         else:
             return jsonify({
                 'success': True,
