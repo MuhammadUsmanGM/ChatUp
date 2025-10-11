@@ -251,12 +251,20 @@ try:
             from openai_agents import Agent, Runner, AsyncOpenAI, set_default_openai_client, set_tracing_disabled, OpenAIChatCompletionsModel, set_default_openai_api
         except ImportError:
             from agently import Agent, Runner, AsyncOpenAI, set_default_openai_client, set_tracing_disabled, OpenAIChatCompletionsModel, set_default_openai_api
+
+    # Import Tavily for web search
+    try:
+        from tavily import TavilyClient
+    except ImportError:
+        print("AGENT_ERROR: tavily-python library not installed")
+        sys.exit(1)
     
     # Initialize the API client
     import os
     gemini_api_key = os.getenv("GEMINI_API_KEY")
+    tavily_api_key = os.getenv("TAVILY_API_KEY")
     if not gemini_api_key:
-        print("AGENT_ERROR: API key not found")
+        print("AGENT_ERROR: GEMINI_API_KEY not found")
         sys.exit(1)
     
     external_client = AsyncOpenAI(
@@ -271,11 +279,40 @@ try:
         openai_client=external_client
     )
 
+    # Import the function_tool decorator
+    try:
+        from agents import function_tool
+    except ImportError:
+        print("AGENT_ERROR: function_tool not available in agents library")
+        sys.exit(1)
+
+    # Initialize Tavily client for web search
+    tavily_client = TavilyClient(api_key=tavily_api_key) if tavily_api_key else None
+
+    @function_tool()
+    def search_web(query: str) -> str:
+        """
+        Function to search the web using Tavily API
+        """
+        if not tavily_client:
+            return "Web search is not available. Tavily API key is not configured."
+        
+        try:
+            response = tavily_client.search(query, max_results=5)
+            results = []
+            for result in response['results']:
+                results.append(f"Title: {{result['title']}}\\nURL: {{result['url']}}\\nContent: {{result['content'][:500]}}...\\n")
+            
+            return "\\n".join(results)
+        except Exception as e:
+            return f"Web search failed: {{str(e)}}"
+
     # Create and run the agent with the user input
     agent = Agent(
         name="Assistant",
-        instructions="A helpful assistant.",
-        model=model
+        instructions="A helpful assistant. You can use the search_web tool to search the web for current information when needed.",
+        model=model,
+        tools=[search_web]  # Add the web search tool
     )
     result = Runner.run_sync(
         starting_agent=agent,
@@ -300,7 +337,7 @@ finally:
             [sys.executable, temp_script_path], 
             capture_output=True, 
             text=True, 
-            timeout=30  # 30 second timeout
+            timeout=60  # Increased timeout to 60 seconds for web search
         )
         
         # Clean up the temporary script
