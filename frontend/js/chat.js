@@ -370,37 +370,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Clear current chat
         clearChat();
         
-        // Generate a new chat ID
-        currentChatId = 'chat_' + Date.now();
-        localStorage.setItem('currentChatId', currentChatId);
+        // Reset current chat ID to start a new conversation
+        currentChatId = null; // We'll set this to the ID returned by the backend after first message
+        localStorage.removeItem('currentChatId');
         
-        // Update chat history in localStorage for this user
-        const userEmail = localStorage.getItem('userEmail');
-        if (!userEmail) {
-            console.error('No user email available');
-            return;
-        }
-        
-        const userChatHistoryKey = `chat_history_${userEmail}`;
-        const chatHistory = JSON.parse(localStorage.getItem(userChatHistoryKey) || '[]');
-        const newChat = {
-            id: currentChatId,
-            title: 'New Chat',
-            lastMessage: 'New chat started',
-            timestamp: new Date().toISOString(),
-            messages: []
-        };
-
-        chatHistory.unshift(newChat); // Add to the beginning of the array
-        localStorage.setItem(userChatHistoryKey, JSON.stringify(chatHistory));
-
-        // Update the chat history list
-        updateChatHistoryList();
-
         // Show welcome message
         if (welcomeMessage) {
             welcomeMessage.style.display = 'flex';
         }
+        
+        // Update the chat history list
+        updateChatHistoryList();
     }
     
     // Function to update the chat history list UI for the current user
@@ -833,7 +813,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({
                     message: message,
-                    userId: localStorage.getItem('userEmail')  // Use email to identify user
+                    userId: localStorage.getItem('userEmail'),  // Use email to identify user
+                    chatId: currentChatId  // Include current chat ID to add to existing chat
                 })
             });
             
@@ -842,6 +823,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             const data = await response.json();
+            
+            // Update current chat ID with the one returned from the server
+            if (data.chatId && !currentChatId) {
+                currentChatId = data.chatId;
+                localStorage.setItem('currentChatId', currentChatId);
+            }
+            
             return data.response;
         } catch (error) {
             console.error('Error sending message to backend:', error);

@@ -1433,6 +1433,7 @@ def chat():
         data = request.get_json()
         message = data.get('message')
         user_email = data.get('userId')  # Get user email from frontend
+        chat_id = data.get('chatId')  # Get chat ID from frontend (if exists)
         
         # Log the incoming message for debugging
         print(f"Received chat message from {user_email}: {message}")
@@ -1442,23 +1443,54 @@ def chat():
         
         # Save chat to database
         if user_email:  # Only save if we have user identification
-            # Create or add to a chat session
-            # We'll create a new chat for each conversation (as each POST represents a new conversation)
-            chat_entry = {
-                'user_email': user_email,
-                'timestamp': datetime.now(),
-                'title': message[:50] + "..." if len(message) > 50 else message,  # Use first part of message as title
-                'messages': [
-                    {'sender': 'user', 'text': message, 'timestamp': datetime.now()},
-                    {'sender': 'bot', 'text': bot_response, 'timestamp': datetime.now()}
-                ]
-            }
-            
-            # Create new chat document
-            result = chat_history_collection.insert_one(chat_entry)
+            if chat_id:
+                # If a chat_id is provided, add the messages to the existing chat
+                result = chat_history_collection.update_one(
+                    {'_id': ObjectId(chat_id)},
+                    {
+                        '$push': {
+                            'messages': {
+                                '$each': [
+                                    {
+                                        'sender': 'user',
+                                        'text': message,
+                                        'timestamp': datetime.now()
+                                    },
+                                    {
+                                        'sender': 'bot',
+                                        'text': bot_response,
+                                        'timestamp': datetime.now()
+                                    }
+                                ]
+                            }
+                        },
+                        '$set': {
+                            'updated_at': datetime.now()
+                        }
+                    }
+                )
+                # Use the provided chat_id
+                returned_chat_id = chat_id
+            else:
+                # If no chat_id is provided, create a new chat session
+                chat_entry = {
+                    'user_email': user_email,
+                    'title': message[:50] + "..." if len(message) > 50 else message,  # Use first part of message as title
+                    'created_at': datetime.now(),
+                    'updated_at': datetime.now(),
+                    'messages': [
+                        {'sender': 'user', 'text': message, 'timestamp': datetime.now()},
+                        {'sender': 'bot', 'text': bot_response, 'timestamp': datetime.now()}
+                    ]
+                }
+                
+                # Create new chat document
+                result = chat_history_collection.insert_one(chat_entry)
+                returned_chat_id = str(result.inserted_id)  # Get the ID of the new chat
         
         return jsonify({
-            'response': bot_response
+            'response': bot_response,
+            'chatId': returned_chat_id  # Return chat ID so frontend can track the session
         }), 200
         
     except Exception as e:
@@ -1491,14 +1523,16 @@ def get_chat_history():
         # Get chat history for the user from the database
         chats = list(chat_history_collection.find({
             'user_email': user_email
-        }).sort('timestamp', -1).limit(50))  # Get last 50 chats, most recent first
+        }).sort('created_at', -1).limit(50))  # Get last 50 chats, most recent first
         
         # Format the results
         formatted_chats = []
         for chat in chats:
             formatted_chats.append({
                 'id': str(chat['_id']),
-                'timestamp': chat['timestamp'].isoformat(),
+                'title': chat.get('title', 'New Chat'),
+                'created_at': chat.get('created_at', chat.get('timestamp', datetime.now())).isoformat(),
+                'updated_at': chat.get('updated_at', chat.get('created_at', datetime.now())).isoformat(),
                 'messages': chat['messages']
             })
         
