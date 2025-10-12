@@ -3,6 +3,20 @@
 ## Overview
 ChatUp is a sophisticated chat application that combines modern web technologies with powerful AI capabilities. The platform features a user-friendly interface with secure authentication, real-time chat functionality, and seamless AI integration powered by Google's Gemini model.
 
+## Technology Stack
+
+### Frontend  
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white&style=flat)  ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white&style=flat)  ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black&style=flat)  ![Font Awesome](https://img.shields.io/badge/Font_Awesome-528DD7?logo=fontawesome&logoColor=white&style=flat)  ![Google Fonts](https://img.shields.io/badge/Google%20Fonts-4285F4?logo=google&logoColor=white&style=flat)  
+
+### Backend  
+![Flask](https://img.shields.io/badge/Flask-000000?logo=flask&logoColor=white&style=flat)  ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white&style=flat)  ![Werkzeug](https://img.shields.io/badge/Werkzeug-005F73?logo=python&logoColor=white&style=flat)  ![Flask-CORS](https://img.shields.io/badge/Flask-CORS-000000?logo=flask&logoColor=white&style=flat)  
+
+### AI & External Services  
+![Google Gemini API](https://img.shields.io/badge/Google%20Gemini-4285F4?logo=google&logoColor=white&style=flat)  ![Tavily API](https://img.shields.io/badge/Tavily-00ADEF?style=flat)  ![SMTP](https://img.shields.io/badge/SMTP-D14836?logo=gmail&logoColor=white&style=flat)  
+
+### Database  
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white&style=flat)  ![PyMongo](https://img.shields.io/badge/PyMongo-47A248?logo=python&logoColor=white&style=flat) 
+
 ## Features
 
 ### 🔐 Authentication & Security
@@ -47,28 +61,6 @@ ChatUp is a sophisticated chat application that combines modern web technologies
 - **Email Masking**: Privacy-focused email display with reveal functionality
 - **Contact Support**: Integrated support system with email notifications
 
-## Technology Stack
-
-### Frontend
-- **HTML5 & CSS3**: Semantic markup and modern styling with CSS Grid/Flexbox
-- **JavaScript (ES6+)**: Client-side logic, API communication, and UI interactions
-- **Font Awesome**: Icon library for intuitive interface elements
-- **Google Fonts**: Poppins font family for consistent typography
-
-### Backend
-- **Python Flask**: REST API framework for backend services
-- **PyMongo**: MongoDB driver for database operations
-- **Werkzeug**: Security utilities and password hashing
-- **Flask-CORS**: Cross-origin resource sharing support
-
-### AI & External Services
-- **Google Gemini API**: AI-powered chat responses
-- **Tavily API**: Web search functionality for current information
-- **SMTP**: Email support for verification and notifications
-
-### Database
-- **MongoDB**: NoSQL database for user data and chat history
-- **PyMongo**: Python driver for MongoDB operations
 
 ## Architecture Highlights
 
