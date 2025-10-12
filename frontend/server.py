@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from pymongo import MongoClient
 from bson import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -1593,8 +1593,114 @@ def delete_chat_history(chat_id):
             'message': 'Failed to delete chat history'
         }), 500
 
-from flask import send_from_directory
-import os
+# Contact Support Endpoint
+@app.route('/contact-support', methods=['POST'])
+def contact_support():
+    try:
+        data = request.get_json()
+        
+        # Extract user data
+        name = data.get('name')
+        email = data.get('email')
+        message = data.get('message')
+        
+        # Validate input
+        if not name or not email or not message:
+            return jsonify({
+                'success': False,
+                'message': 'All fields (name, email, message) are required'
+            }), 400
+        
+        # Validate email format
+        import re
+        email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+        if not re.match(email_pattern, email):
+            return jsonify({
+                'success': False,
+                'message': 'Invalid email format'
+            }), 400
+        
+        # Validate message length
+        if len(message) < 10:
+            return jsonify({
+                'success': False,
+                'message': 'Message must be at least 10 characters long'
+            }), 400
+        
+        # Send the support email
+        support_sent = send_support_email(email, name, message)
+        
+        if support_sent:
+            return jsonify({
+                'success': True,
+                'message': 'Your message has been sent successfully! Our support team will contact you soon.'
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Failed to send your message. Please try again later.'
+            }), 500
+            
+    except Exception as e:
+        print(f"Contact support error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while processing your request'
+        }), 500
+
+
+# Function to send support email
+def send_support_email(user_email, user_name, user_message):
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+    
+    # Email configuration - you can use environment variables for these
+    smtp_server = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
+    smtp_port = int(os.getenv('SMTP_PORT', '587'))
+    sender_email = os.getenv('EMAIL_ADDRESS')
+    sender_password = os.getenv('EMAIL_PASSWORD')
+    
+    if not sender_email or not sender_password:
+        print("Email configuration missing. Please set EMAIL_ADDRESS and EMAIL_PASSWORD environment variables.")
+        return False
+    
+    try:
+        # Create the email
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = sender_email  # Send to the support team (same as sender in this case)
+        msg['Subject'] = f"Support Request from {user_name} <{user_email}>"
+        
+        body = f"""
+        New support request received:
+        
+        Name: {user_name}
+        Email: {user_email}
+        Message: {user_message}
+        
+        Please respond to the user's email address: {user_email}
+        """
+        
+        msg.attach(MIMEText(body, 'plain'))
+        
+        # Connect to server and send email
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        text = msg.as_string()
+        server.sendmail(sender_email, sender_email, text)  # Send to the support email address
+        server.quit()
+        
+        print(f"Support email sent from {user_email}")
+        return True
+        
+    except Exception as e:
+        print(f"Failed to send support email: {e}")
+        return False
+
 
 # Serve static files (HTML, CSS, JS)
 @app.route('/')
@@ -1616,6 +1722,7 @@ def asset_files(filename):
 @app.route('/images/<path:filename>')
 def image_files(filename):
     return send_from_directory('../images', filename)
+
 
 if __name__ == '__main__':
     print("Starting server on http://localhost:5000")
