@@ -1831,4 +1831,220 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.height = (this.scrollHeight) + 'px';
         });
     }
+
+    // Contact Support Modal Functionality
+    const contactSupportBtn = document.getElementById('contact-support-btn');
+    const contactSupportModal = document.getElementById('contact-support-modal');
+    const closeContactSupport = document.getElementById('close-contact-support');
+    const cancelContactSupport = document.getElementById('cancel-contact-support');
+    const contactSupportForm = document.getElementById('contact-support-form');
+    const supportNameInput = document.getElementById('support-name');
+    const supportEmailInput = document.getElementById('support-email');
+    const supportMessageInput = document.getElementById('support-message');
+
+    // Show contact support modal
+    if (contactSupportBtn) {
+        contactSupportBtn.addEventListener('click', function() {
+            contactSupportModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        });
+    }
+
+    // Close contact support modal
+    if (closeContactSupport) {
+        closeContactSupport.addEventListener('click', function() {
+            contactSupportModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+            resetContactSupportForm();
+        });
+    }
+
+    if (cancelContactSupport) {
+        cancelContactSupport.addEventListener('click', function() {
+            contactSupportModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+            resetContactSupportForm();
+        });
+    }
+
+    // Also close modal when clicking outside of it
+    if (contactSupportModal) {
+        contactSupportModal.addEventListener('click', function(e) {
+            if (e.target === contactSupportModal) {
+                contactSupportModal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Re-enable scrolling
+                resetContactSupportForm();
+            }
+        });
+    }
+
+    // Reset contact support form
+    function resetContactSupportForm() {
+        contactSupportForm.reset();
+        // Hide error messages
+        document.querySelectorAll('.error-message').forEach(el => {
+            el.classList.remove('show');
+        });
+        // Clear field error styling
+        document.querySelectorAll('#support-name, #support-email, #support-message').forEach(input => {
+            input.style.borderColor = '';
+            input.style.boxShadow = '';
+        });
+    }
+
+    // Handle contact support form submission
+    if (contactSupportForm) {
+        contactSupportForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Get form values
+            const name = supportNameInput.value.trim();
+            const email = supportEmailInput.value.trim();
+            const message = supportMessageInput.value.trim();
+
+            // Reset errors
+            resetErrors();
+
+            // Validate form
+            let hasError = false;
+
+            // Name validation
+            if (!name) {
+                showError('name-error', 'Name is required');
+                markFieldError('support-name');
+                hasError = true;
+            } else if (name.length < 2) {
+                showError('name-error', 'Name must be at least 2 characters');
+                markFieldError('support-name');
+                hasError = true;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email) {
+                showError('email-error', 'Email is required');
+                markFieldError('support-email');
+                hasError = true;
+            } else if (!emailRegex.test(email)) {
+                showError('email-error', 'Please enter a valid email address');
+                markFieldError('support-email');
+                hasError = true;
+            }
+
+            // Message validation
+            if (!message) {
+                showError('message-error', 'Message is required');
+                markFieldError('support-message');
+                hasError = true;
+            } else if (message.length < 10) {
+                showError('message-error', 'Message must be at least 10 characters');
+                markFieldError('support-message');
+                hasError = true;
+            }
+
+            if (hasError) {
+                return;
+            }
+
+            // Disable form during submission
+            const submitBtn = contactSupportForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+
+            try {
+                // Send the support request to the backend
+                const response = await fetch('/contact-support', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        message: message
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showNotification('Your message has been sent successfully! Our support team will contact you soon.', 'success');
+                    // Reset form and close modal
+                    resetContactSupportForm();
+                    contactSupportModal.style.display = 'none';
+                    document.body.style.overflow = 'auto'; // Re-enable scrolling
+                } else {
+                    showNotification(result.message || 'Failed to send your message. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error sending support request:', error);
+                showNotification('An error occurred while sending your message. Please try again.', 'error');
+            } finally {
+                // Re-enable form
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    }
+
+    // Helper functions for form validation
+    function showError(errorId, message) {
+        const errorElement = document.getElementById(errorId);
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+        }
+    }
+
+    function markFieldError(inputId) {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.style.borderColor = '#ff6b6b';
+            input.style.boxShadow = '0 0 0 2px rgba(255, 107, 107, 0.3)';
+        }
+    }
+
+    function resetErrors() {
+        // Hide all error messages
+        document.querySelectorAll('.error-message').forEach(el => {
+            el.classList.remove('show');
+        });
+        // Reset field styles
+        document.querySelectorAll('#support-name, #support-email, #support-message').forEach(input => {
+            input.style.borderColor = '';
+            input.style.boxShadow = '';
+        });
+    }
+
+    // Add input event listeners to clear errors when user types
+    if (supportNameInput) {
+        supportNameInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+                document.getElementById('name-error').classList.remove('show');
+                this.style.borderColor = '';
+                this.style.boxShadow = '';
+            }
+        });
+    }
+
+    if (supportEmailInput) {
+        supportEmailInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+                document.getElementById('email-error').classList.remove('show');
+                this.style.borderColor = '';
+                this.style.boxShadow = '';
+            }
+        });
+    }
+
+    if (supportMessageInput) {
+        supportMessageInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+                document.getElementById('message-error').classList.remove('show');
+                this.style.borderColor = '';
+                this.style.boxShadow = '';
+            }
+        });
+    }
 });
