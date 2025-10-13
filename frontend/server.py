@@ -34,6 +34,7 @@ try:
 except Exception as e:
     print(f"Error connecting to MongoDB: {e}")
 
+
 # Registration endpoint
 @app.route('/register', methods=['POST'])
 def register():
