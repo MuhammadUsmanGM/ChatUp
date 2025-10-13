@@ -1082,20 +1082,18 @@ def send_verification_email(email, name, token):
         msg['To'] = email
         msg['Subject'] = "Verify Your Email Address - ChatUp"
         
-        body = f"""
-        Hello {name},
-        
-        Thank you for registering with ChatUp! Please click the link below to verify your email address:
-        
-        {verification_link}
-        
-        If you did not register for ChatUp, please ignore this email.
-        
-        Best regards,
-        The ChatUp Team
-        """
-        
-        msg.attach(MIMEText(body, 'plain'))
+        body = f"""Hello {name},
+
+Thank you for registering with ChatUp! Please click the link below to verify your email address:
+
+{verification_link}
+
+If you did not register for ChatUp, please ignore this email.
+
+Best regards,
+The ChatUp Team"""
+
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
         
         # Connect to server and send email
         server = smtplib.SMTP(smtp_server, smtp_port)
@@ -1140,22 +1138,20 @@ def send_password_reset_email(email, name, token):
         msg['To'] = email
         msg['Subject'] = "Password Reset Request - ChatUp"
         
-        body = f"""
-        Hello {name},
-        
-        You have requested to reset your password for your ChatUp account. Please click the link below to reset your password:
-        
-        {reset_link}
-        
-        This link will expire in 2 hours for security reasons.
-        
-        If you did not request a password reset, please ignore this email or contact support if you believe this is unauthorized access.
-        
-        Best regards,
-        The ChatUp Team
-        """
-        
-        msg.attach(MIMEText(body, 'plain'))
+        body = f"""Hello {name},
+
+You have requested to reset your password for your ChatUp account. Please click the link below to reset your password:
+
+{reset_link}
+
+This link will expire in 2 hours for security reasons.
+
+If you did not request a password reset, please ignore this email or contact support if you believe this is unauthorized access.
+
+Best regards,
+The ChatUp Team"""
+
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
         
         # Connect to server and send email
         server = smtplib.SMTP(smtp_server, smtp_port)
@@ -1674,17 +1670,15 @@ def send_support_email(user_email, user_name, user_message):
         msg['To'] = sender_email  # Send to the support team (same as sender in this case)
         msg['Subject'] = f"Support Request from {user_name} <{user_email}>"
         
-        body = f"""
-        New support request received:
-        
-        Name: {user_name}
-        Email: {user_email}
-        Message: {user_message}
-        
-        Please respond to the user's email address: {user_email}
-        """
-        
-        msg.attach(MIMEText(body, 'plain'))
+        body = f"""New support request received:
+
+Name: {user_name}
+Email: {user_email}
+Message: {user_message}
+
+Please respond to the user's email address: {user_email}"""
+
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
         
         # Connect to server and send email
         server = smtplib.SMTP(smtp_server, smtp_port)
