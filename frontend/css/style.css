@@ -327,6 +327,44 @@ body {
     text-transform: uppercase;
 }
 
+.contact-support-container {
+    padding: 1rem;
+    text-align: center;
+    border-top: 1px solid #eee;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    margin-top: auto;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.contact-support-btn {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.2rem;
+    border-radius: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    width: 100%;
+    font-size: 1rem;
+}
+
+.contact-support-btn:hover {
+    background: linear-gradient(135deg, #ff5252, #e53e3e);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.contact-support-btn:active {
+    transform: translateY(0);
+}
+
 .sidebar.hidden {
     width: 0;
     overflow: hidden;
@@ -2914,6 +2952,188 @@ body {
 
 .form-toggle {
     margin-bottom: 1rem; /* Reduced from default to save space */
+}
+
+/* Contact Support Modal */
+.contact-support-modal {
+    background: white;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    animation: modalAppear 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    position: relative;
+}
+
+.contact-support-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.contact-support-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.contact-support-content {
+    padding: 1.5rem;
+}
+
+.contact-support-content .input-group {
+    margin-bottom: 1.2rem;
+}
+
+.contact-support-content .input-group label {
+    display: block;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.contact-support-content .input-group label i {
+    margin-right: 0.5rem;
+    color: #667eea;
+}
+
+.contact-support-content .input-group input,
+.contact-support-content .input-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f9f9f9;
+    font-family: 'Poppins', sans-serif;
+}
+
+.contact-support-content .input-group input:focus,
+.contact-support-content .input-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    background: white;
+}
+
+.contact-support-content .input-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.error-message {
+    display: block;
+    color: #ff6b6b;
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+    margin-left: 0.5rem;
+    display: none; /* Hidden by default */
+}
+
+.error-message.show {
+    display: block;
+}
+
+.contact-support-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.contact-support-actions .btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+}
+
+/* Tablet and smaller screens for contact support modal */
+@media (max-width: 768px) {
+    .contact-support-modal {
+        width: 95%;
+        margin: 1rem;
+    }
+    
+    .contact-support-header {
+        padding: 1.2rem;
+    }
+    
+    .contact-support-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .contact-support-content {
+        padding: 1.5rem;
+    }
+    
+    .contact-support-content .input-group {
+        margin-bottom: 1rem;
+    }
+    
+    .contact-support-content .input-group label {
+        font-size: 0.9rem;
+    }
+    
+    .contact-support-content .input-group input,
+    .contact-support-content .input-group textarea {
+        padding: 10px 12px;
+        font-size: 1rem;
+    }
+    
+    .contact-support-actions {
+        padding: 1rem;
+        flex-direction: column;
+    }
+    
+    .contact-support-actions .btn {
+        width: 100%;
+        margin: 0;
+    }
+}
+
+/* Small mobile devices for contact support modal */
+@media (max-width: 480px) {
+    .contact-support-modal {
+        width: 98%;
+        margin: 0.5rem;
+    }
+    
+    .contact-support-header {
+        padding: 1rem;
+    }
+    
+    .contact-support-header h2 {
+        font-size: 1.2rem;
+    }
+    
+    .contact-support-content {
+        padding: 1rem;
+    }
+    
+    .contact-support-content .input-group {
+        margin-bottom: 1rem;
+    }
+    
+    .contact-support-content .input-group label {
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+    }
+    
+    .contact-support-content .input-group input,
+    .contact-support-content .input-group textarea {
+        padding: 9px 11px;
+        font-size: 0.95rem;
+    }
+    
+    .contact-support-actions {
+        padding: 0.8rem 0;
+    }
 }
 
 /* Overall form container adjustment */
