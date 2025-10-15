@@ -365,6 +365,60 @@ body {
     transform: translateY(0);
 }
 
+/* Support Button for Auth Page */
+.contact-support-btn-auth {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 18px; /* More rectangular shape */
+    display: flex;
+    align-items: center;
+    padding-left: 8px; /* Make space for icon on the left */
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    font-size: 0.9rem;
+    position: absolute;
+    top: 1rem;
+    left: 1rem; /* Positioned in top left corner */
+    overflow: hidden;
+    transition: all 0.4s ease;
+}
+
+.contact-support-btn-auth:hover {
+    background: linear-gradient(135deg, #5a6fd8, #6a4190);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    width: 140px; /* Extended width to accommodate text */
+}
+
+.contact-support-btn-auth i {
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.contact-support-btn-auth::after {
+    content: "Contact Support";
+    position: absolute;
+    left: 36px; /* Start position to the right */
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    z-index: 1;
+    padding: 6px 8px;
+    background: transparent; /* Inherit background from parent */
+    transition: all 0.4s ease;
+}
+
+.contact-support-btn-auth:hover::after {
+    opacity: 1;
+}
+
 .sidebar.hidden {
     width: 0;
     overflow: hidden;
@@ -3264,6 +3318,30 @@ body {
       0 8px 32px 0 rgba(31, 38, 135, 0.2),
       inset 0 4px 10px rgba(255, 255, 255, 0.2);
     outline: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+#theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.1);
+    box-shadow: 
+      0 8px 32px 0 rgba(31, 38, 135, 0.25),
+      inset 0 4px 15px rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="dark"] #theme-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #e0e0e0;
+    box-shadow: 
+      0 8px 32px 0 rgba(0, 0, 0, 0.3),
+      inset 0 4px 10px rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] #theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      0 8px 32px 0 rgba(0, 0, 0, 0.4),
+      inset 0 4px 15px rgba(255, 255, 255, 0.15);
 }
 
 #theme-toggle:hover {
