@@ -3668,6 +3668,42 @@ body {
     text-decoration: underline;
 }
 
+/* Custom Scrollbar for Sidebar */
+.sidebar-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin: 8px 0;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #764ba2, #667eea);
+    transform: scale(1.1);
+    border-radius: 4px;
+}
+
+/* Dark theme scrollbar */
+[data-theme="dark"] .sidebar-content::-webkit-scrollbar-track {
+    background: rgba(25, 25, 35, 0.3);
+}
+
+[data-theme="dark"] .sidebar-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6a8eff, #7d9cff);
+}
+
+[data-theme="dark"] .sidebar-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #7d9cff, #6a8eff);
+}
+
 /* Forgot Password link styling */
 .forgot-password-link {
     text-align: center;
