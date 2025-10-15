@@ -372,20 +372,51 @@ body {
     border: none;
     width: 36px;
     height: 36px;
-    border-radius: 50%;
+    border-radius: 18px; /* More rectangular shape */
     display: flex;
     align-items: center;
-    justify-content: center;
+    padding-left: 8px; /* Make space for icon on the left */
     cursor: pointer;
-    transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     font-size: 0.9rem;
+    position: absolute;
+    top: 1rem;
+    left: 1rem; /* Positioned in top left corner */
+    overflow: hidden;
+    transition: all 0.4s ease;
 }
 
 .contact-support-btn-auth:hover {
     background: linear-gradient(135deg, #5a6fd8, #6a4190);
-    transform: scale(1.1);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    width: 140px; /* Extended width to accommodate text */
+}
+
+.contact-support-btn-auth i {
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.contact-support-btn-auth::after {
+    content: "Contact Support";
+    position: absolute;
+    left: 36px; /* Start position to the right */
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    z-index: 1;
+    padding: 6px 8px;
+    background: transparent; /* Inherit background from parent */
+    transition: all 0.4s ease;
+}
+
+.contact-support-btn-auth:hover::after {
+    opacity: 1;
 }
 
 .sidebar.hidden {
@@ -3276,6 +3307,9 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
     font-size: 1rem;
     z-index: 1000;
     margin: 0;
