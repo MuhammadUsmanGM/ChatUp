@@ -365,6 +365,29 @@ body {
     transform: translateY(0);
 }
 
+/* Support Button for Auth Page */
+.contact-support-btn-auth {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    font-size: 0.9rem;
+}
+
+.contact-support-btn-auth:hover {
+    background: linear-gradient(135deg, #5a6fd8, #6a4190);
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
 .sidebar.hidden {
     width: 0;
     overflow: hidden;
@@ -3253,9 +3276,6 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
     font-size: 1rem;
     z-index: 1000;
     margin: 0;
@@ -3264,6 +3284,30 @@ body {
       0 8px 32px 0 rgba(31, 38, 135, 0.2),
       inset 0 4px 10px rgba(255, 255, 255, 0.2);
     outline: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+#theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.1);
+    box-shadow: 
+      0 8px 32px 0 rgba(31, 38, 135, 0.25),
+      inset 0 4px 15px rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="dark"] #theme-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #e0e0e0;
+    box-shadow: 
+      0 8px 32px 0 rgba(0, 0, 0, 0.3),
+      inset 0 4px 10px rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] #theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      0 8px 32px 0 rgba(0, 0, 0, 0.4),
+      inset 0 4px 15px rgba(255, 255, 255, 0.15);
 }
 
 #theme-toggle:hover {

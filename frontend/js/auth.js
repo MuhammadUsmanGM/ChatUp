@@ -1834,6 +1834,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Contact Support Modal Functionality
     const contactSupportBtn = document.getElementById('contact-support-btn');
+    const contactSupportBtnAuth = document.getElementById('contact-support-btn-auth');
     const contactSupportModal = document.getElementById('contact-support-modal');
     const closeContactSupport = document.getElementById('close-contact-support');
     const cancelContactSupport = document.getElementById('cancel-contact-support');
@@ -1845,6 +1846,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Show contact support modal
     if (contactSupportBtn) {
         contactSupportBtn.addEventListener('click', function() {
+            contactSupportModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        });
+    }
+    
+    // Show contact support modal from auth page
+    if (contactSupportBtnAuth) {
+        contactSupportBtnAuth.addEventListener('click', function() {
             contactSupportModal.style.display = 'flex';
             document.body.style.overflow = 'hidden'; // Prevent background scrolling
         });
