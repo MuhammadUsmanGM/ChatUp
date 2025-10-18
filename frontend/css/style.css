@@ -365,6 +365,35 @@ body {
     transform: translateY(0);
 }
 
+.newsletter-btn {
+    background: linear-gradient(135deg, #51cf66, #40c057);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.2rem;
+    border-radius: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(81, 207, 102, 0.3);
+    width: 100%;
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+}
+
+.newsletter-btn:hover {
+    background: linear-gradient(135deg, #40c057, #37b24d);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(81, 207, 102, 0.4);
+}
+
+.newsletter-btn:active {
+    transform: translateY(0);
+}
+
 /* Support Button for Auth Page */
 .contact-support-btn-auth {
     background: linear-gradient(135deg, #667eea, #764ba2);
