@@ -338,7 +338,7 @@ body {
 }
 
 .contact-support-btn {
-    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    background: linear-gradient(135deg, #339af0, #4dabf7);
     color: white;
     border: none;
     padding: 0.8rem 1.2rem;
@@ -350,15 +350,15 @@ body {
     gap: 0.5rem;
     font-weight: 500;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    box-shadow: 0 4px 15px rgba(51, 154, 240, 0.3);
     width: 100%;
     font-size: 1rem;
 }
 
 .contact-support-btn:hover {
-    background: linear-gradient(135deg, #ff5252, #e53e3e);
+    background: linear-gradient(135deg, #228be6, #339af0);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+    box-shadow: 0 6px 20px rgba(51, 154, 240, 0.4);
 }
 
 .contact-support-btn:active {
@@ -396,7 +396,7 @@ body {
 
 /* Support Button for Auth Page */
 .contact-support-btn-auth {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #339af0, #4dabf7);
     color: white;
     border: none;
     width: 36px;
@@ -406,7 +406,7 @@ body {
     align-items: center;
     padding-left: 8px; /* Make space for icon on the left */
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 15px rgba(51, 154, 240, 0.4);
     font-size: 0.9rem;
     position: absolute;
     top: 1rem;
@@ -416,8 +416,8 @@ body {
 }
 
 .contact-support-btn-auth:hover {
-    background: linear-gradient(135deg, #5a6fd8, #6a4190);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    background: linear-gradient(135deg, #228be6, #339af0);
+    box-shadow: 0 6px 20px rgba(51, 154, 240, 0.5);
     width: 140px; /* Extended width to accommodate text */
 }
 
