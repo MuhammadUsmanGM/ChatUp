@@ -229,7 +229,7 @@ def run_chat_agent(user_input):
     """
     try:
         # Path to the backend directory
-        backend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'backend')
+        backend_path = os.path.join(os.path.dirname(__file__), 'backend')
         
         # Create a temporary script to run the agent
         temp_script_content = f'''import sys
@@ -1722,7 +1722,15 @@ def asset_files(filename):
 
 @app.route('/images/<path:filename>')
 def image_files(filename):
-    return send_from_directory('../images', filename)
+    return send_from_directory('images', filename)
+
+# Favicon route
+@app.route('/favicon.ico')
+def favicon():
+    from flask import send_file
+    import os
+    favicon_path = os.path.join('images', 'Logo.png')
+    return send_file(favicon_path)
 
 
 if __name__ == '__main__':
