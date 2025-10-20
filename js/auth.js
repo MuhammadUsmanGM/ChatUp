@@ -613,8 +613,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup password toggles for all password fields
     setupPasswordToggle('reveal-email-password', 'toggle-reveal-email-password');
     setupPasswordToggle('old-password', 'toggle-old-password');
-    setupPasswordToggle('new-password', 'toggle-new-password');
-    setupPasswordToggle('confirm-new-password', 'toggle-confirm-new-password');
+    setupPasswordToggle('change-new-password', 'toggle-change-new-password');
+    setupPasswordToggle('change-confirm-new-password', 'toggle-change-confirm-new-password');
     setupPasswordToggle('delete-password', 'toggle-delete-password');
     setupPasswordToggle('login-password', 'toggle-login-password');
     setupPasswordToggle('signup-password', 'toggle-signup-password');
@@ -756,14 +756,14 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             
             const oldPassword = document.getElementById('old-password').value;
-            const newPassword = document.getElementById('new-password').value;
-            const confirmNewPassword = document.getElementById('confirm-new-password').value;
+            const newPassword = document.getElementById('change-new-password').value;
+            const confirmNewPassword = document.getElementById('change-confirm-new-password').value;
             
             // Validation
             let hasError = false;
             
             // Clear previous error indicators
-            clearFieldErrors(['#old-password', '#new-password', '#confirm-new-password']);
+            clearFieldErrors(['#old-password', '#change-new-password', '#change-confirm-new-password']);
             
             // Check each field and add error indicator if empty
             if (!oldPassword) {
@@ -772,12 +772,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             if (!newPassword) {
-                addFieldError('#new-password', 'Required');
+                addFieldError('#change-new-password', 'Required');
                 hasError = true;
             }
             
             if (!confirmNewPassword) {
-                addFieldError('#confirm-new-password', 'Required');
+                addFieldError('#change-confirm-new-password', 'Required');
                 hasError = true;
             }
             
