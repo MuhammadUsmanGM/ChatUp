@@ -1827,8 +1827,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Auto-resize textarea
     if (messageInput) {
         messageInput.addEventListener('input', function() {
+            // Reset height to auto to get the correct scrollHeight
             this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
+            // Calculate the appropriate height, making sure it doesn't exceed max-height
+            const computedStyle = window.getComputedStyle(this);
+            const borderTopWidth = parseFloat(computedStyle.borderTopWidth);
+            const borderBottomWidth = parseFloat(computedStyle.borderBottomWidth);
+            const padding = borderTopWidth + borderBottomWidth;
+            const newHeight = Math.min(this.scrollHeight, 150) + padding;
+            this.style.height = newHeight + 'px';
         });
     }
 
