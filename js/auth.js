@@ -1934,7 +1934,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p>ChatUp reserves the right to modify these terms at any time. Changes will be effective immediately upon posting.</p>
 
                 <h4>7. Governing Law</h4>
-                <p>These terms shall be governed by and construed in accordance with the laws of [Your Country/State], without regard to its conflict of law provisions.</p>
+                <p>These terms shall be governed by and construed in accordance with the laws of Pakistan, without regard to its conflict of law provisions.</p>
             `;
         } else if (type === 'privacy') {
             policyText.innerHTML = `
@@ -1964,7 +1964,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h4>6. Changes to This Policy</h4>
                 <p>We may update this privacy policy from time to time. We will notify you of any changes by posting the new privacy policy on this page.</p>
 
-                <h4>7. Contact Us</h4>
+                <h4>7. Jurisdiction</h4>
+                <p>This Privacy Policy is governed by the laws of Pakistan, specifically the province of Punjab.</p>
+                
+                <h4>8. Contact Us</h4>
                 <p>If you have any questions about this Privacy Policy, please contact us through our support system.</p>
             `;
         }
