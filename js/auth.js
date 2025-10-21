@@ -190,6 +190,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
+            // Check if passwords are strong (require strong passwords)
+            const passwordStrength = checkPasswordStrength(password);
+            if (passwordStrength.level !== 'strong') {
+                showNotification('Please use a strong password with at least 8 characters, including uppercase, lowercase, number, and special character', 'error');
+                return;
+            }
+            
             // Check if terms agreement checkbox is checked
             const termsAgreement = document.getElementById('terms-agreement');
             if (!termsAgreement.checked) {
@@ -592,12 +599,74 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Password strength checker function
+    function checkPasswordStrength(password) {
+        let strength = 0;
+        let feedback = [];
+        
+        // Check for length
+        if (password.length >= 8) strength++;
+        else feedback.push("At least 8 characters");
+        
+        // Check for lowercase letters
+        if (/[a-z]/.test(password)) strength++;
+        else feedback.push("Lowercase letter");
+        
+        // Check for uppercase letters
+        if (/[A-Z]/.test(password)) strength++;
+        else feedback.push("Uppercase letter");
+        
+        // Check for numbers
+        if (/\d/.test(password)) strength++;
+        else feedback.push("Number");
+        
+        // Check for special characters
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+        else feedback.push("Special character");
+        
+        // Return strength level and feedback
+        if (strength <= 2) return { level: 'weak', message: `Weak - Add: ${feedback.join(", ")}` };
+        if (strength === 3) return { level: 'moderate', message: "Moderate - Consider adding more variety" };
+        return { level: 'strong', message: "Strong password" };
+    }
+
     // Password visibility toggle functionality
     function setupPasswordToggle(inputId, toggleId) {
         const passwordInput = document.getElementById(inputId);
         const toggleElement = document.getElementById(toggleId);
         
         if (passwordInput && toggleElement) {
+            // Add event listener for password input to check strength (only for signup forms, not login)
+            if (inputId === 'signup-password' || inputId === 'signup-confirm-password' || 
+                inputId === 'new-password' || inputId === 'confirm-new-password') {
+                passwordInput.addEventListener('input', function() {
+                    const password = this.value;
+                    if (password.length > 0) {
+                        const strength = checkPasswordStrength(password);
+                        // Reset classes
+                        toggleElement.classList.remove('weak-password', 'moderate-password', 'strong-password');
+                        // Add appropriate class based on strength
+                        if (strength.level === 'weak') {
+                            toggleElement.classList.add('weak-password');
+                        } else if (strength.level === 'moderate') {
+                            toggleElement.classList.add('moderate-password');
+                        } else if (strength.level === 'strong') {
+                            toggleElement.classList.add('strong-password');
+                        }
+                    } else {
+                        // Reset to default color when no password is entered
+                        toggleElement.classList.remove('weak-password', 'moderate-password', 'strong-password');
+                    }
+                });
+                
+                // Reset color when field is cleared or loses focus
+                passwordInput.addEventListener('blur', function() {
+                    if (this.value.length === 0) {
+                        toggleElement.classList.remove('weak-password', 'moderate-password', 'strong-password');
+                    }
+                });
+            }
+            
             toggleElement.addEventListener('click', function() {
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);

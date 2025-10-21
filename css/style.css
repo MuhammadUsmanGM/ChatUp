@@ -233,6 +233,19 @@ body {
     color: #667eea;
 }
 
+/* Password strength indicator for eye icons */
+.password-toggle.weak-password {
+    color: #ff6b6b; /* Red for weak password */
+}
+
+.password-toggle.moderate-password {
+    color: #f5a623; /* Yellow for moderate password */
+}
+
+.password-toggle.strong-password {
+    color: #28a745; /* Green for strong password */
+}
+
 .btn {
     padding: 12px 18px; /* Reduced padding to save space */
     border: none;
