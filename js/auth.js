@@ -190,6 +190,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
+            // Check if terms agreement checkbox is checked
+            const termsAgreement = document.getElementById('terms-agreement');
+            if (!termsAgreement.checked) {
+                showNotification('Please agree to the Terms of Service and Privacy Policy', 'error');
+                return;
+            }
+            
             // Show loading state
             const submitBtn = signupForm.querySelector('button[type="submit"]');
             const originalText = submitBtn.textContent;
@@ -1823,6 +1830,145 @@ document.addEventListener('DOMContentLoaded', function() {
     // Password visibility toggle for reset UI
     setupPasswordToggle('new-password', 'toggle-new-password-reset');
     setupPasswordToggle('confirm-new-password', 'toggle-confirm-new-password-reset');
+
+    // Terms and Privacy Policy Modal Functionality
+    const termsAgreement = document.getElementById('terms-agreement');
+    const termsLink = document.getElementById('terms-link');
+    const privacyLink = document.getElementById('privacy-link');
+    const policyModal = document.getElementById('policy-modal');
+    const closePolicy = document.getElementById('close-policy');
+    const acceptPolicy = document.getElementById('accept-policy');
+    const policyTitle = document.getElementById('policy-title');
+    const policyText = document.getElementById('policy-text');
+
+    // Show terms modal when terms link is clicked
+    if (termsLink) {
+        termsLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            policyTitle.textContent = 'Terms of Service';
+            loadPolicyContent('terms');
+            policyModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        });
+    }
+
+    // Show privacy policy modal when privacy link is clicked
+    if (privacyLink) {
+        privacyLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            policyTitle.textContent = 'Privacy Policy';
+            loadPolicyContent('privacy');
+            policyModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        });
+    }
+
+    // Clicking on the agreement text should open the terms modal
+    const agreementText = document.querySelector('.agreement-text');
+    if (agreementText) {
+        agreementText.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Only show the terms modal if clicking on the text part (not links)
+            if (e.target.tagName !== 'A') {
+                policyTitle.textContent = 'Terms of Service';
+                loadPolicyContent('terms');
+                policyModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        });
+    }
+
+    // Close policy modal
+    if (closePolicy) {
+        closePolicy.addEventListener('click', function() {
+            policyModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+    }
+
+    // Accept policy and close modal
+    if (acceptPolicy) {
+        acceptPolicy.addEventListener('click', function() {
+            policyModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            // Check the agreement checkbox if not already checked
+            if (termsAgreement && !termsAgreement.checked) {
+                termsAgreement.checked = true;
+            }
+        });
+    }
+
+    // Also close modal when clicking outside of it
+    if (policyModal) {
+        policyModal.addEventListener('click', function(e) {
+            if (e.target === policyModal) {
+                policyModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+    }
+
+    // Function to load policy content based on type
+    function loadPolicyContent(type) {
+        if (type === 'terms') {
+            policyText.innerHTML = `
+                <h3>Terms of Service</h3>
+                <p><strong>Last updated:</strong> October 21, 2025</p>
+
+                <h4>1. Acceptance of Terms</h4>
+                <p>By accessing and using ChatUp, you accept and agree to be bound by the terms and provision of this agreement.</p>
+
+                <h4>2. Use License</h4>
+                <p>Permission is granted to temporarily download one copy of ChatUp per person for personal, non-commercial transitory viewing only.</p>
+
+                <h4>3. Disclaimer</h4>
+                <p>ChatUp is provided "as is" without any representations or warranties, express or implied.</p>
+
+                <h4>4. Limitations</h4>
+                <p>In no event shall ChatUp or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use ChatUp.</p>
+
+                <h4>5. Accuracy of Materials</h4>
+                <p>The materials appearing on ChatUp may include technical, typographical, or photographic errors. These materials are provided "as is" without warranty of any kind.</p>
+
+                <h4>6. Modifications</h4>
+                <p>ChatUp reserves the right to modify these terms at any time. Changes will be effective immediately upon posting.</p>
+
+                <h4>7. Governing Law</h4>
+                <p>These terms shall be governed by and construed in accordance with the laws of [Your Country/State], without regard to its conflict of law provisions.</p>
+            `;
+        } else if (type === 'privacy') {
+            policyText.innerHTML = `
+                <h3>Privacy Policy</h3>
+                <p><strong>Last updated:</strong> October 21, 2025</p>
+
+                <h4>1. Information We Collect</h4>
+                <p>We collect information you provide directly to us, such as when you create an account, use our services, or communicate with us.</p>
+
+                <h4>2. How We Use Information</h4>
+                <p>We use information about you to provide, maintain, and improve our services, to communicate with you, and to ensure the security of our services.</p>
+
+                <h4>3. Information Sharing</h4>
+                <p>We do not share your personal information with companies, organizations, or individuals outside of ChatUp except in the following cases:</p>
+                <ul>
+                    <li>With your consent</li>
+                    <li>For legal reasons</li>
+                    <li>For external processing</li>
+                </ul>
+
+                <h4>4. Data Security</h4>
+                <p>We implement appropriate data collection, storage and processing practices and security measures to protect against unauthorized access, alteration, disclosure or destruction of your personal information.</p>
+
+                <h4>5. Your Rights</h4>
+                <p>Depending on your location, you may have rights to access, correct, or delete your personal information.</p>
+
+                <h4>6. Changes to This Policy</h4>
+                <p>We may update this privacy policy from time to time. We will notify you of any changes by posting the new privacy policy on this page.</p>
+
+                <h4>7. Contact Us</h4>
+                <p>If you have any questions about this Privacy Policy, please contact us through our support system.</p>
+            `;
+        }
+    }
 
     // Auto-resize textarea
     if (messageInput) {
