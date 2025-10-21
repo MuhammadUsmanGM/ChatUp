@@ -394,6 +394,42 @@ body {
     transform: translateY(0);
 }
 
+.github-btn {
+    background: linear-gradient(135deg, #333333, #6e6e6e);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.2rem;
+    border-radius: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(51, 51, 51, 0.3);
+    width: 100%;
+    font-size: 1rem;
+    text-decoration: none;
+}
+
+.github-btn:hover {
+    background: linear-gradient(135deg, #4a4a4a, #7d7d7d);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(51, 51, 51, 0.4);
+}
+
+.github-btn:active {
+    transform: translateY(0);
+}
+
+/* Style the link wrapper to not affect the button styling */
+.github-link {
+    text-decoration: none;
+    display: block;
+    margin-bottom: 0.8rem;
+}
+
 /* Support Button for Auth Page */
 .contact-support-btn-auth {
     background: linear-gradient(135deg, #339af0, #4dabf7);
