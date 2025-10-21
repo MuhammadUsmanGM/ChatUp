@@ -16,13 +16,42 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend communication
 
 # MongoDB Configuration
-MONGO_URI = "mongodb://localhost:27017/"
-DB_NAME = "Credentials"
-COLLECTION_NAME = "User_info"
+import os
+from urllib.parse import quote_plus
+MONGO_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
+DB_NAME = os.getenv("DB_NAME", "Credentials")
+COLLECTION_NAME = os.getenv("COLLECTION_NAME", "User_info")
 
-# Connect to MongoDB
+# If using MongoDB Atlas and credentials are in the connection string, ensure they are properly encoded
+if "mongodb+srv://" in MONGO_URI:
+    # Parse the MongoDB Atlas connection string to properly encode credentials
+    from urllib.parse import urlparse, urlunparse
+    parsed = urlparse(MONGO_URI)
+    
+    # Extract username and password
+    username = parsed.username
+    password = parsed.password
+    
+    # If credentials exist, re-encode them properly
+    if username and password:
+        # Create new netloc with properly encoded credentials
+        encoded_username = quote_plus(username)
+        encoded_password = quote_plus(password)
+        encoded_netloc = f"{encoded_username}:{encoded_password}@{parsed.hostname}"
+        
+        # If there are additional hosts in the netloc (for clusters), preserve them
+        if parsed.port:
+            encoded_netloc += f":{parsed.port}"
+        
+        # Reconstruct the URL with encoded credentials
+        MONGO_URI = parsed._replace(netloc=encoded_netloc).geturl()
+
+# Connect to MongoDB with SSL settings for Atlas
 try:
-    client = MongoClient(MONGO_URI)
+    client = MongoClient(MONGO_URI, 
+                         tls=True, 
+                         tlsAllowInvalidCertificates=True,
+                         serverSelectionTimeoutMS=30000)
     db = client[DB_NAME]
     user_collection = db[COLLECTION_NAME]
     # Create a separate collection for chat history
@@ -1447,7 +1476,7 @@ def chat():
             if chat_id:
                 # If a chat_id is provided, add the messages to the existing chat
                 result = chat_history_collection.update_one(
-                    {'_id': ObjectId(chat_id)},
+                    {'_id': ObjectId(chat_id), 'user_email': user_email},  # Ensure user owns this chat
                     {
                         '$push': {
                             'messages': {
@@ -1470,8 +1499,26 @@ def chat():
                         }
                     }
                 )
-                # Use the provided chat_id
-                returned_chat_id = chat_id
+                
+                if result.matched_count > 0:
+                    # Successfully updated existing chat
+                    returned_chat_id = chat_id
+                else:
+                    # Chat not found for this user, create a new one
+                    chat_entry = {
+                        'user_email': user_email,
+                        'title': message[:50] + "..." if len(message) > 50 else message,  # Use first part of message as title
+                        'created_at': datetime.now(),
+                        'updated_at': datetime.now(),
+                        'messages': [
+                            {'sender': 'user', 'text': message, 'timestamp': datetime.now()},
+                            {'sender': 'bot', 'text': bot_response, 'timestamp': datetime.now()}
+                        ]
+                    }
+                    
+                    # Create new chat document
+                    result = chat_history_collection.insert_one(chat_entry)
+                    returned_chat_id = str(result.inserted_id)  # Get the ID of the new chat
             else:
                 # If no chat_id is provided, create a new chat session
                 chat_entry = {
@@ -1496,6 +1543,8 @@ def chat():
         
     except Exception as e:
         print(f"Chat error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             'response': "Sorry, I'm having trouble processing your message right now."
         }), 500
@@ -1512,8 +1561,13 @@ def get_chat_history():
                 'success': False,
                 'message': 'Authentication required'
             }), 401
-            
-        # Get user email from request params or decode from token (simplified for demo)
+        
+        # Extract the token from the header
+        token = auth_header.split(' ')[1]  # Extract token after "Bearer"
+        
+        # In a real application, you would decode the JWT token to get user info
+        # For this implementation, we'll use a simplified approach by requiring the email in the query
+        # but in a real world application, we'd decode the JWT here
         user_email = request.args.get('user_email')
         if not user_email:
             return jsonify({
@@ -1544,6 +1598,8 @@ def get_chat_history():
         
     except Exception as e:
         print(f"Get chat history error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             'success': False,
             'message': 'Failed to retrieve chat history'
@@ -1561,8 +1617,11 @@ def delete_chat_history(chat_id):
                 'success': False,
                 'message': 'Authentication required'
             }), 401
-            
-        # Get user email from request params or decode from token (simplified for demo)
+        
+        # Extract the token from the header (in a real app, decode JWT)
+        token = auth_header.split(' ')[1]
+        
+        # Again, simplifying by getting email from request params
         user_email = request.args.get('user_email')
         if not user_email:
             return jsonify({
@@ -1589,6 +1648,8 @@ def delete_chat_history(chat_id):
         
     except Exception as e:
         print(f"Delete chat history error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             'success': False,
             'message': 'Failed to delete chat history'

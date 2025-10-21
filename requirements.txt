@@ -5,3 +5,4 @@ Werkzeug==2.3.7
 openai-agents
 python-dotenv
 tavily-python
+dnspython
