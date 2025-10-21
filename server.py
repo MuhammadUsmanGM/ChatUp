@@ -7,6 +7,7 @@ import os
 from flask_cors import CORS
 import subprocess
 import sys
+import secrets
 
 # Load environment variables from .env file
 from dotenv import load_dotenv
@@ -62,6 +63,9 @@ try:
     print(f"Available collections: {db.list_collection_names()}")
 except Exception as e:
     print(f"Error connecting to MongoDB: {e}")
+    # Exit the application if database connection fails
+    import sys
+    sys.exit(1)
 
 
 # Registration endpoint
@@ -97,7 +101,6 @@ def register():
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=10)
         
         # Create user document
-        import secrets
         verification_token = secrets.token_urlsafe(32)  # Generate a secure token
         
         user_document = {
@@ -548,12 +551,13 @@ def verify_email_page(token):
             '''
         
         # Update user to mark email as verified
+        # Keep the verification token for reference
         user_collection.update_one(
             {'_id': user['_id']},
             {
                 '$set': {
-                    'email_verified': True,
-                    'verification_token': None  # Remove the token after verification
+                    'email_verified': True
+                    # Keep verification_token for reference - don't clear it
                 }
             }
         )
@@ -871,12 +875,13 @@ def verify_email(token):
             }), 400
         
         # Update user to mark email as verified
+        # Keep the verification token for reference
         user_collection.update_one(
             {'_id': user['_id']},
             {
                 '$set': {
-                    'email_verified': True,
-                    'verification_token': None  # Remove the token after verification
+                    'email_verified': True
+                    # Keep verification_token for reference - don't clear it
                 }
             }
         )
@@ -924,7 +929,6 @@ def resend_verification():
             }), 400
         
         # Generate a new verification token
-        import secrets
         new_token = secrets.token_urlsafe(32)
         
         # Update user with new token
@@ -1284,7 +1288,6 @@ def request_password_reset():
             }), 404
         
         # Generate a password reset token
-        import secrets
         reset_token = secrets.token_urlsafe(32)
         reset_token_expires = datetime.now().timestamp() + (2 * 60 * 60)  # 2 hours from now
         
@@ -1315,6 +1318,8 @@ def request_password_reset():
         
     except Exception as e:
         print(f"Request password reset error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             'success': False,
             'message': 'An error occurred while requesting password reset.'
