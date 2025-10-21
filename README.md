@@ -89,7 +89,13 @@ The application requires the following environment variables:
 - `TAVILY_API_KEY`: Tavily API key for web search
 - `EMAIL_ADDRESS`: SMTP email address for notifications
 - `EMAIL_PASSWORD`: SMTP email password
-- `MONGODB_URI`: MongoDB connection string
+- `MONGODB_URI`: MongoDB Atlas connection string
+- `DB_NAME`: Database name (default: Credentials)
+- `COLLECTION_NAME`: Collection name (default: User_info)
+
+### Setting up MongoDB Atlas
+
+For detailed instructions on setting up MongoDB Atlas, see [MONGODB_ATLAS_SETUP.md](MONGODB_ATLAS_SETUP.md).
 
 ## API Endpoints
 
