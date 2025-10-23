@@ -87,16 +87,7 @@ body {
     margin: 20px auto; /* Add vertical margins to prevent overflow */
 }
 
-.form-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 5px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    z-index: 1;
-}
+
 
 .form-container:hover {
     transform: translateY(-5px);
