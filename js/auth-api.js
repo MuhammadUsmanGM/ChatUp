@@ -90,3 +90,32 @@ function getCurrentUser() {
     }
     return null;
 }
+
+// Copy protection functionality - replaces copied text with restriction message
+document.addEventListener('copy', function(e) {
+    // Prevent the default copy behavior
+    e.preventDefault();
+    
+    // Set the clipboard data to a restriction message
+    const restrictionMessage = 'Cannot copy from ChatUp - Content restriction in place\n\nFor more information, visit https://github.com/MuhammadUsmanGM/ChatUp';
+    
+    if (e.clipboardData) {
+        e.clipboardData.setData('text/plain', restrictionMessage);
+    } else {
+        // Fallback for older browsers
+        try {
+            document.execCommand('insertText', false, restrictionMessage);
+        } catch (err) {
+            // If all else fails, use clipboard API
+            navigator.clipboard.writeText(restrictionMessage).catch(function() {
+                // If clipboard API also fails, add to a hidden element and copy from there
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = restrictionMessage;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempTextArea);
+            });
+        }
+    }
+});
