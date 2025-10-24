@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE $PORT
 
-CMD ["gunicorn", "--bind", "0.0.0.0:$PORT", "server:app"]
+CMD gunicorn --bind 0.0.0.0:$PORT server:app
