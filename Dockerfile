@@ -12,7 +12,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Railway automatically exposes the port, no need to specify EXPOSE here
-# The $PORT environment variable is provided by Railway
-
-CMD gunicorn --bind 0.0.0.0:$PORT server:app
+# Use the Python script to start the server
+CMD python start_server.py

@@ -3,7 +3,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "gunicorn --bind 0.0.0.0:$PORT server:app",
+    "startCommand": "python start_server.py",
     "numReplicas": 1,
     "healthcheckUrl": "/health"
   }
