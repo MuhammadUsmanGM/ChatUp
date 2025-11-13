@@ -1,9 +1,5 @@
 {
   "build": {
     "builder": "NIXPACKS"
-  },
-  "deploy": {
-    "startCommand": "python start_server.py",
-    "healthcheckUrl": "/health"
   }
 }

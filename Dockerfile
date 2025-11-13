@@ -12,5 +12,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Command will be overridden by Railway
 CMD ["python", "start_server.py"]

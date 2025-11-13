@@ -1,6 +1,0 @@
-[build]
-  builder = "NIXPACKS"
-
-[scripts]
-  build = "pip install --no-cache-dir -r requirements.txt"
-  start = "python start_server.py"
