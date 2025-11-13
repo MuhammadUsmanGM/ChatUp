@@ -1,0 +1,10 @@
+[phases.setup]
+  nixPkgs = ['python39', 'gcc', 'openssl', 'postgresql', 'libpq']
+
+[phases.build]
+  dependsOn = ['setup']
+  cmds = ['pip install --no-cache-dir -r requirements.txt']
+
+[phases.start]
+  dependsOn = ['build']
+  cmd = 'gunicorn --bind 0.0.0.0:$PORT server:app'

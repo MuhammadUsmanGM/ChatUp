@@ -1,0 +1,9 @@
+[build]
+  builder = "nixpacks"
+
+[env]
+  PORT = "8080"
+
+[scripts]
+  build = "pip install --no-cache-dir -r requirements.txt"
+  start = "gunicorn --bind 0.0.0.0:$PORT server:app"

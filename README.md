@@ -84,7 +84,26 @@ ChatUp is a sophisticated chat application that combines modern web technologies
 
 ## Deployment
 
-The application requires the following environment variables:
+### Railway Deployment (Recommended)
+
+Deploy this application directly to Railway with one click:
+
+1. Push this repository to GitHub
+2. Connect your GitHub account to Railway
+3. Create a new project and select this repository
+4. Add the following environment variables in the Railway dashboard:
+   - `GEMINI_API_KEY`: Google Gemini API key
+   - `TAVILY_API_KEY`: Tavily API key for web search
+   - `EMAIL_ADDRESS`: SMTP email address for notifications
+   - `EMAIL_PASSWORD`: SMTP email password (app password for Gmail)
+   - `MONGODB_URI`: MongoDB Atlas connection string
+   - `DB_NAME`: Database name (default: Credentials)
+   - `COLLECTION_NAME`: Collection name (default: User_info)
+   - `BASE_URL`: Your Railway app URL (format: https://your-app-name.up.railway.app)
+
+### Local Deployment
+
+For local deployment, the application requires the following environment variables:
 - `GEMINI_API_KEY`: Google Gemini API key
 - `TAVILY_API_KEY`: Tavily API key for web search
 - `EMAIL_ADDRESS`: SMTP email address for notifications
@@ -93,7 +112,7 @@ The application requires the following environment variables:
 - `DB_NAME`: Database name (default: Credentials)
 - `COLLECTION_NAME`: Collection name (default: User_info)
 
-### Setting up MongoDB Atlas
+#### Setting up MongoDB Atlas
 
 For detailed instructions on setting up MongoDB Atlas, see [MONGODB_ATLAS_SETUP.md](MONGODB_ATLAS_SETUP.md).
 
