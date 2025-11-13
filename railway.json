@@ -4,7 +4,6 @@
   },
   "deploy": {
     "startCommand": "python start_server.py",
-    "numReplicas": 1,
     "healthcheckUrl": "/health"
   }
 }

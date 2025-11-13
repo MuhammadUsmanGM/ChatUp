@@ -12,5 +12,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Use the Python script to start the server
-CMD python start_server.py
+# Command will be overridden by Railway
+CMD ["python", "start_server.py"]

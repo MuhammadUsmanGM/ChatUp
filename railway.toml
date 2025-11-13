@@ -1,8 +1,5 @@
 [build]
-  builder = "nixpacks"
-
-[env]
-  PORT = "8080"
+  builder = "NIXPACKS"
 
 [scripts]
   build = "pip install --no-cache-dir -r requirements.txt"
