@@ -1799,8 +1799,11 @@ def favicon():
     return send_file(favicon_path)
 
 
-if __name__ == '__main__':
-    # Get the port from environment variable or default to 5000
-    port = int(os.environ.get('PORT', 5000))
-    print(f"Starting server on port {port}")
-    app.run(debug=False, port=port, host='0.0.0.0')
+# Note: This file should not be run directly in production
+# Use gunicorn or another WSGI server for production deployment
+
+# To run locally for development:
+# if __name__ == '__main__':
+#     port = int(os.environ.get('PORT', 5000))
+#     print(f"Starting server on port {port}")
+#     app.run(debug=False, port=port, host='0.0.0.0')
